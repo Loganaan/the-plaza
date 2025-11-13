@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import type { Conversation } from "@/app/marketplace/types";
+import { useState, useRef, useEffect } from "react";
+import type { Conversation, Message } from "@/app/marketplace/types";
 
 interface ChatBoxProps {
   conversation: Conversation;
@@ -9,6 +9,57 @@ interface ChatBoxProps {
 
 export default function ChatBox({ conversation }: ChatBoxProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(conversation.messages);
+  const [newMessage, setNewMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (isOpen && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isOpen]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || isSending) return;
+
+    setIsSending(true);
+    try {
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          conversationId: conversation.id,
+          senderId: conversation.buyer.id, // Sending as buyer
+          receiverId: conversation.seller.id,
+          content: newMessage.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const message = await response.json();
+      setMessages([...messages, message]);
+      setNewMessage("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   return (
     <>
@@ -84,23 +135,23 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {conversation.messages.length === 0 ? (
+            {messages.length === 0 ? (
               <div className="text-center text-gray-500 mt-8">
                 No messages yet
               </div>
             ) : (
-              conversation.messages.map((message) => {
+              messages.map((message) => {
                 const isBuyer = message.sender.id === conversation.buyer.id;
                 return (
                   <div
                     key={message.id}
-                    className={`flex ${isBuyer ? "justify-start" : "justify-end"}`}
+                    className={`flex ${isBuyer ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[75%] rounded-lg p-3 ${
                         isBuyer
-                          ? "bg-gray-700 text-gray-200"
-                          : "bg-blue-600 text-white"
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-700 text-gray-200"
                       }`}
                     >
                       <p className="text-xs font-semibold mb-1">
@@ -118,6 +169,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
                 );
               })
             )}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
@@ -126,25 +178,52 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
               <input
                 type="text"
                 placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="flex-1 bg-[#252525] text-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled
+                disabled={isSending}
               />
               <button
+                onClick={handleSendMessage}
                 className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled
+                disabled={isSending || !newMessage.trim()}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                </svg>
+                {isSending ? (
+                  <svg
+                    className="animate-spin h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  </svg>
+                )}
               </button>
             </div>
             <p className="text-xs text-gray-500 mt-2 text-center">
-              Message sending disabled (mock data)
+              Chatting as {conversation.buyer.name || conversation.buyer.email}
             </p>
           </div>
         </div>
