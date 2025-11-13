@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { useRouter } from "next/navigation";
 import type { Listing } from "@/app/marketplace/types.ts";
 
 interface ListingsGridProps {
@@ -8,6 +11,8 @@ interface ListingsGridProps {
 }
 
 const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error }) => {
+  const router = useRouter();
+
   if (loading) {
     return (
       <div className="grid grid-cols-4 gap-6">
@@ -46,6 +51,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
       {listings.map((listing) => (
         <div
           key={listing.id}
+          onClick={() => router.push(`/marketplace/${listing.id}`)}
           className="bg-[#1c1c1c] rounded-lg p-4 flex flex-col gap-3 shadow-lg hover:bg-[#252525] transition-colors cursor-pointer"
         >
           <div className="bg-gray-800 h-40 rounded-lg flex items-center justify-center text-gray-600">
