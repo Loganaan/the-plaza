@@ -7,6 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  name          String?
+  googleId      String         @unique
+  picture       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  listings            Listing[]
+  sentMessages        Message[]        @relation("SentMessages")
+  receivedMessages    Message[]        @relation("ReceivedMessages")
+  buyerConversations  Conversation[]   @relation("BuyerConversations")
+  sellerConversations Conversation[]   @relation("SellerConversations")
+}
+
 model Category {
   id       Int       @id @default(autoincrement())
   field    String
@@ -23,6 +39,44 @@ model Listing {
   dateListed  DateTime      @default(now())
   category    Category?     @relation(fields: [categoryId], references: [id])
   categoryId  Int?
+  seller      User          @relation(fields: [sellerId], references: [id])
+  sellerId    Int
+  
+  conversations Conversation[]
+}
+
+model Conversation {
+  id         Int       @id @default(autoincrement())
+  listing    Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId  Int
+  buyer      User      @relation("BuyerConversations", fields: [buyerId], references: [id])
+  buyerId    Int
+  seller     User      @relation("SellerConversations", fields: [sellerId], references: [id])
+  sellerId   Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  messages   Message[]
+  
+  @@unique([listingId, buyerId, sellerId])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Message {
+  id             Int          @id @default(autoincrement())
+  content        String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId Int
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  senderId       Int
+  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId     Int
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  
+  @@index([conversationId])
+  @@index([senderId])
 }
 
 enum ListingStatus {
