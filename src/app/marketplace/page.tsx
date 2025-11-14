@@ -39,11 +39,9 @@ export default function Marketplace() {
     : listings;
 
   return (
-    <div className="flex min-h-screen bg-[#121212] text-gray-200">
-      <main className="flex-1 p-8">
-        <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} />
-        <ListingsGrid listings={filteredListings} loading={loading} error={error} />
-      </main>
-    </div>
+    <>
+      <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} />
+      <ListingsGrid listings={filteredListings} loading={loading} error={error} />
+    </>
   );
 }
