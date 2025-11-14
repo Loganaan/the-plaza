@@ -14,7 +14,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange }) => {
   return (
     <div className="max-w-3xl mb-8">
       <div className={`flex items-center rounded-full px-4 py-2 ${
-        isDarkMode ? "bg-[#1c1c1c]" : "bg-gray-100 border border-gray-300"
+        isDarkMode ? "bg-[#3a3a3a]" : "bg-gray-100 border border-gray-300"
       }`}>
         <input
           type="text"
