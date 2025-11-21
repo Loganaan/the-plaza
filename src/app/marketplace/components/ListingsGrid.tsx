@@ -67,12 +67,15 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
         <div
           key={listing.id}
           onClick={() => router.push(`/marketplace/${listing.id}`)}
-          className={`rounded-lg p-4 flex flex-col gap-3 shadow-lg transition-colors cursor-pointer ${
+          className={`rounded-lg p-4 flex flex-col gap-3 shadow-lg transition-all cursor-pointer relative overflow-hidden group ${
             isDarkMode 
-              ? "bg-[#1c1c1c] hover:bg-[#252525]" 
-              : "bg-white border border-gray-200 hover:bg-gray-50"
+              ? "bg-[#1c1c1c]" 
+              : "bg-white border border-gray-200 hover:bg-gray-200"
           }`}
         >
+          {isDarkMode && (
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 group-hover:opacity-50 transition-opacity rounded-lg pointer-events-none" />
+          )}
           <div className={`h-40 rounded-lg flex items-center justify-center overflow-hidden relative ${
             isDarkMode ? "bg-gray-800 text-gray-600" : "bg-gray-200 text-gray-400"
           }`}>
