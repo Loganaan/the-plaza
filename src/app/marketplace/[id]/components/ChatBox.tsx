@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { Conversation, Message } from "@/app/marketplace/types";
+import { useTheme } from "@/app/context/ThemeContext";
 
 interface ChatBoxProps {
   conversation: Conversation;
 }
 
 export default function ChatBox({ conversation }: ChatBoxProps) {
+  const { isDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(conversation.messages);
   const [newMessage, setNewMessage] = useState("");
@@ -103,19 +105,19 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
 
       {/* Chat Box */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-[#1c1c1c] rounded-lg shadow-2xl flex flex-col z-50 border border-gray-700">
+        <div className={`fixed bottom-24 right-6 w-96 h-[500px] rounded-lg shadow-2xl flex flex-col z-50 border ${isDarkMode ? 'bg-[#1c1c1c] border-gray-700' : 'bg-white border-gray-300'}`}>
           {/* Header */}
-          <div className="bg-[#252525] p-4 rounded-t-lg border-b border-gray-700">
+          <div className={`p-4 rounded-t-lg border-b ${isDarkMode ? 'bg-[#252525] border-gray-700' : 'bg-gray-100 border-gray-300'}`}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-gray-200">Conversation</h3>
-                <p className="text-xs text-gray-400">
+                <h3 className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>Conversation</h3>
+                <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   {conversation.buyer.name} & {conversation.seller.name}
                 </p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-200"
+                className={isDarkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -136,7 +138,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 ? (
-              <div className="text-center text-gray-500 mt-8">
+              <div className={`text-center mt-8 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 No messages yet
               </div>
             ) : (
@@ -151,7 +153,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
                       className={`max-w-[75%] rounded-lg p-3 ${
                         isBuyer
                           ? "bg-blue-600 text-white"
-                          : "bg-gray-700 text-gray-200"
+                          : isDarkMode ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-gray-900"
                       }`}
                     >
                       <p className="text-xs font-semibold mb-1">
@@ -173,7 +175,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t border-gray-700">
+          <div className={`p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -181,7 +183,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 bg-[#252525] text-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDarkMode ? 'bg-[#252525] text-gray-200' : 'bg-gray-100 text-gray-900'}`}
                 disabled={isSending}
               />
               <button
@@ -222,7 +224,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
                 )}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className={`text-xs mt-2 text-center ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
               Chatting as {conversation.buyer.name || conversation.buyer.email}
             </p>
           </div>
