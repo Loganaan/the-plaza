@@ -10,9 +10,10 @@ interface ListingsGridProps {
   listings: Listing[];
   loading: boolean;
   error: string | null;
+  onCategoryClick?: (category: string) => void;
 }
 
-const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error }) => {
+const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, onCategoryClick }) => {
   const router = useRouter();
   const { isDarkMode } = useTheme();
 
@@ -66,8 +67,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
       {listings.map((listing) => (
         <div
           key={listing.id}
-          onClick={() => router.push(`/marketplace/${listing.id}`)}
-          className={`rounded-lg p-4 flex flex-col gap-3 shadow-lg transition-all cursor-pointer relative overflow-hidden group ${
+          className={`rounded-lg p-4 flex flex-col gap-3 shadow-lg transition-all relative overflow-hidden group ${
             isDarkMode 
               ? "bg-[#1c1c1c]" 
               : "bg-white border border-gray-200 hover:bg-gray-200"
@@ -76,9 +76,11 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
           {isDarkMode && (
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 group-hover:opacity-50 transition-opacity rounded-lg pointer-events-none" />
           )}
-          <div className={`h-40 rounded-lg flex items-center justify-center overflow-hidden relative ${
-            isDarkMode ? "bg-gray-800 text-gray-600" : "bg-gray-200 text-gray-400"
-          }`}>
+          <div 
+            onClick={() => router.push(`/marketplace/${listing.id}`)}
+            className={`h-40 rounded-lg flex items-center justify-center overflow-hidden relative cursor-pointer ${
+              isDarkMode ? "bg-gray-800 text-gray-600" : "bg-gray-200 text-gray-400"
+            }`}>
             {listing.imageUrl ? (
               <Image
                 src={listing.imageUrl}
@@ -104,9 +106,13 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
             )}
           </div>
           <div className="relative z-10">
-            <p className={`text-sm font-semibold truncate transition-colors ${
-              isDarkMode ? "text-gray-200 group-hover:text-white" : "text-gray-900"
-            }`} title={listing.title}>
+            <p 
+              onClick={() => router.push(`/marketplace/${listing.id}`)}
+              className={`text-sm font-semibold truncate transition-colors cursor-pointer hover:underline ${
+                isDarkMode ? "text-gray-200 group-hover:text-white" : "text-gray-900"
+              }`} 
+              title={listing.title}
+            >
               {listing.title}
             </p>
             <p className={`text-sm font-bold transition-colors ${
@@ -120,9 +126,17 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
               {listing.description || "No description available"}
             </p>
             {listing.category && (
-              <p className={`text-xs mt-1 transition-colors ${
-                isDarkMode ? "text-yellow-400 group-hover:text-yellow-200" : "text-yellow-600 group-hover:text-yellow-800"
-              }`}>
+              <p 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (listing.category) {
+                    onCategoryClick?.(listing.category.field);
+                  }
+                }}
+                className={`text-xs mt-1 transition-colors cursor-pointer hover:underline ${
+                  isDarkMode ? "text-yellow-400 group-hover:text-yellow-200" : "text-yellow-600 group-hover:text-yellow-800"
+                }`}
+              >
                 {listing.category.field}
               </p>
             )}

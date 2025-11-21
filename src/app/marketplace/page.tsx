@@ -34,14 +34,24 @@ export default function Marketplace() {
   const filteredListings = search
     ? listings.filter((l) =>
         l.title.toLowerCase().includes(search.toLowerCase()) ||
-        (l.description?.toLowerCase().includes(search.toLowerCase()) ?? false)
+        (l.description?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
+        (l.category?.field.toLowerCase().includes(search.toLowerCase()) ?? false)
       )
     : listings;
+
+  const handleCategoryClick = (category: string) => {
+    setSearch(category);
+  };
 
   return (
     <>
       <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
-      <ListingsGrid listings={filteredListings} loading={loading} error={error} />
+      <ListingsGrid 
+        listings={filteredListings} 
+        loading={loading} 
+        error={error} 
+        onCategoryClick={handleCategoryClick}
+      />
     </>
   );
 }
