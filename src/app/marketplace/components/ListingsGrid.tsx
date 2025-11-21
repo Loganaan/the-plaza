@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import type { Listing } from "@/app/marketplace/types.ts";
@@ -64,18 +64,29 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
   }
   return (
     <div className="grid grid-cols-4 gap-6">
-      {listings.map((listing) => (
-        <div
-          key={listing.id}
-          className={`rounded-lg p-4 flex flex-col gap-3 shadow-lg transition-all relative overflow-hidden group ${
-            isDarkMode 
-              ? "bg-[#1c1c1c]" 
-              : "bg-white border border-gray-200 hover:bg-gray-200"
-          }`}
-        >
-          {isDarkMode && (
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 opacity-0 group-hover:opacity-50 transition-opacity rounded-lg pointer-events-none" />
-          )}
+      {listings.map((listing) => {
+        const ListingCard = () => {
+          const [isHovered, setIsHovered] = useState(false);
+          
+          return (
+            <div
+              key={listing.id}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className={`rounded-lg p-4 flex flex-col gap-3 shadow-lg relative overflow-hidden transition-colors border ${
+                isDarkMode 
+                  ? "bg-[#1c1c1c] border-transparent" 
+                  : isHovered 
+                    ? "bg-gray-200 border-gray-300" 
+                    : "bg-white border-gray-200"
+              }`}
+            >
+              {isDarkMode && (
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 transition-opacity duration-200 rounded-lg pointer-events-none" 
+                  style={{ opacity: isHovered ? 0.5 : 0 }}
+                />
+              )}
           <div 
             onClick={() => router.push(`/marketplace/${listing.id}`)}
             className={`h-40 rounded-lg flex items-center justify-center overflow-hidden relative cursor-pointer ${
@@ -105,49 +116,53 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
               </svg>
             )}
           </div>
-          <div className="relative z-10">
-            <p 
-              onClick={() => router.push(`/marketplace/${listing.id}`)}
-              className={`text-sm font-semibold truncate transition-colors cursor-pointer hover:underline ${
-                isDarkMode ? "text-gray-200 group-hover:text-white" : "text-gray-900"
-              }`} 
-              title={listing.title}
-            >
-              {listing.title}
-            </p>
-            <p className={`text-sm font-bold transition-colors ${
-              isDarkMode ? "text-green-400 group-hover:text-green-300" : "text-green-600"
-            }`}>
-              ${listing.price.toFixed(2)}
-            </p>
-            <p className={`text-xs line-clamp-2 transition-colors ${
-              isDarkMode ? "text-gray-400 group-hover:text-gray-200" : "text-gray-600"
-            }`}>
-              {listing.description || "No description available"}
-            </p>
-            {listing.category && (
-              <p 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (listing.category) {
-                    onCategoryClick?.(listing.category.field);
-                  }
-                }}
-                className={`text-xs mt-1 transition-colors cursor-pointer hover:underline ${
-                  isDarkMode ? "text-yellow-400 group-hover:text-yellow-200" : "text-yellow-600 group-hover:text-yellow-800"
-                }`}
-              >
-                {listing.category.field}
-              </p>
-            )}
-            <p className={`text-xs mt-1 transition-colors ${
-              isDarkMode ? "text-gray-500 group-hover:text-gray-300" : "text-gray-500"
-            }`}>
-              Listed: {new Date(listing.dateListed).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
-      ))}
+              <div className="relative z-10">
+                <p 
+                  onClick={() => router.push(`/marketplace/${listing.id}`)}
+                  className={`text-sm font-semibold truncate transition-colors cursor-pointer hover:underline ${
+                    isDarkMode ? (isHovered ? "text-white" : "text-gray-200") : "text-gray-900"
+                  }`} 
+                  title={listing.title}
+                >
+                  {listing.title}
+                </p>
+                <p className={`text-sm font-bold transition-colors ${
+                  isDarkMode ? (isHovered ? "text-green-300" : "text-green-400") : "text-green-600"
+                }`}>
+                  ${listing.price.toFixed(2)}
+                </p>
+                <p className={`text-xs line-clamp-2 transition-colors ${
+                  isDarkMode ? (isHovered ? "text-gray-200" : "text-gray-400") : "text-gray-600"
+                }`}>
+                  {listing.description || "No description available"}
+                </p>
+                {listing.category && (
+                  <p 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (listing.category) {
+                        onCategoryClick?.(listing.category.field);
+                      }
+                    }}
+                    className={`text-xs mt-1 transition-colors cursor-pointer hover:underline ${
+                      isDarkMode ? (isHovered ? "text-yellow-200" : "text-yellow-400") : "text-yellow-600 hover:text-yellow-800"
+                    }`}
+                  >
+                    {listing.category.field}
+                  </p>
+                )}
+                <p className={`text-xs mt-1 transition-colors ${
+                  isDarkMode ? (isHovered ? "text-gray-300" : "text-gray-500") : "text-gray-500"
+                }`}>
+                  Listed: {new Date(listing.dateListed).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          );
+        };
+        
+        return <ListingCard key={listing.id} />;
+      })}
     </div>
   );
 };
