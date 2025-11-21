@@ -40,7 +40,7 @@ export default function Marketplace() {
 
   return (
     <>
-      <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} />
+      <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
       <ListingsGrid listings={filteredListings} loading={loading} error={error} />
     </>
   );
