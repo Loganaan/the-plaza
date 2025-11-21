@@ -52,7 +52,7 @@ export default function Sidebar() {
                 className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg text-left ${
                   isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
                 } ${
-                  pathname === item.href
+                  pathname === item.href || pathname.startsWith(item.href + "/")
                     ? "bg-gradient-to-r from-yellow-400 to-yellow-600 text-black"
                     : ""
                 }`}
