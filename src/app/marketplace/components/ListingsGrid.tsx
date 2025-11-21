@@ -103,27 +103,31 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error })
               </svg>
             )}
           </div>
-          <div>
-            <p className={`text-sm font-semibold truncate ${
-              isDarkMode ? "text-gray-200" : "text-gray-900"
+          <div className="relative z-10">
+            <p className={`text-sm font-semibold truncate transition-colors ${
+              isDarkMode ? "text-gray-200 group-hover:text-white" : "text-gray-900"
             }`} title={listing.title}>
               {listing.title}
             </p>
-            <p className="text-sm font-bold text-green-400">
+            <p className={`text-sm font-bold transition-colors ${
+              isDarkMode ? "text-green-400 group-hover:text-green-300" : "text-green-600"
+            }`}>
               ${listing.price.toFixed(2)}
             </p>
-            <p className={`text-xs line-clamp-2 ${
-              isDarkMode ? "text-gray-400" : "text-gray-600"
+            <p className={`text-xs line-clamp-2 transition-colors ${
+              isDarkMode ? "text-gray-400 group-hover:text-gray-200" : "text-gray-600"
             }`}>
               {listing.description || "No description available"}
             </p>
             {listing.category && (
-              <p className="text-xs text-yellow-400 mt-1">
+              <p className={`text-xs mt-1 transition-colors ${
+                isDarkMode ? "text-yellow-400 group-hover:text-yellow-200" : "text-yellow-600 group-hover:text-yellow-800"
+              }`}>
                 {listing.category.field}
               </p>
             )}
-            <p className={`text-xs mt-1 ${
-              isDarkMode ? "text-gray-500" : "text-gray-500"
+            <p className={`text-xs mt-1 transition-colors ${
+              isDarkMode ? "text-gray-500 group-hover:text-gray-300" : "text-gray-500"
             }`}>
               Listed: {new Date(listing.dateListed).toLocaleDateString()}
             </p>
