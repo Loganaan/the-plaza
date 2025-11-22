@@ -29,22 +29,26 @@ export default function Dashboard() {
     if (listingCount === 0) return;
 
     const duration = 2000; // 2 seconds animation
-    const steps = 60; // Number of updates
-    const increment = listingCount / steps;
-    const stepDuration = duration / steps;
-    let currentStep = 0;
+    const startTime = Date.now();
 
-    const timer = setInterval(() => {
-      currentStep++;
-      if (currentStep >= steps) {
-        setDisplayCount(listingCount);
-        clearInterval(timer);
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function: starts fast, slows down at the end (ease-out)
+      const easeOutQuad = 1 - Math.pow(1 - progress, 3);
+      
+      const currentValue = Math.floor(easeOutQuad * listingCount);
+      setDisplayCount(currentValue);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
       } else {
-        setDisplayCount(Math.floor(increment * currentStep));
+        setDisplayCount(listingCount);
       }
-    }, stepDuration);
+    };
 
-    return () => clearInterval(timer);
+    requestAnimationFrame(animate);
   }, [listingCount]);
 
   return (
