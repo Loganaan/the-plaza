@@ -6,6 +6,7 @@ import { useTheme } from "../../context/ThemeContext";
 const navItems = [
   { label: "Dashboard", href: "/" },
   { label: "Marketplace", href: "/marketplace" },
+  { label: "Discussion Board", href: "/discussions" },
   "Media",
   "Pages",
   "Comments",

@@ -79,6 +79,24 @@ model Message {
   @@index([senderId])
 }
 
+
+model Discussion {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  replies     Reply[]
+}
+
+model Reply {
+  id           Int      @id @default(autoincrement())
+  content      String
+  discussionId Int
+  discussion   Discussion @relation(fields: [discussionId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+
 enum ListingStatus {
   active
   sold
