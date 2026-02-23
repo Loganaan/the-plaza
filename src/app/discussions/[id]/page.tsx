@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useTheme } from '@/app/context/ThemeContext';
 
 interface Discussion {
   id: number;
@@ -17,6 +18,7 @@ interface Reply {
 
 export default function DiscussionDetail() {
   const { id } = useParams();
+  const { isDarkMode } = useTheme();
   const [discussion, setDiscussion] = useState<Discussion | null>(null);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [replyText, setReplyText] = useState('');
@@ -47,19 +49,21 @@ export default function DiscussionDetail() {
     }
   };
 
-  if (!discussion) return <div className="p-6">Loading...</div>;
+  if (!discussion) return <div className={`p-6 ${isDarkMode ? 'text-white' : 'text-black'}`}>Loading...</div>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Title & Description */}
-      <h1 className="text-2xl font-bold mb-4">{discussion.title}</h1>
-      <p className="mb-6">{discussion.description}</p>
+      <h1 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>{discussion.title}</h1>
+      <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{discussion.description}</p>
 
       {/* Replies */}
-      <h2 className="text-xl font-semibold mb-2">Replies</h2>
+      <h2 className={`text-xl font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`}>Replies</h2>
       <ul className="mb-4">
         {replies.map((r) => (
-          <li key={r.id} className="p-3 rounded border mb-2 bg-var-card">
+          <li key={r.id} className={`p-3 rounded border mb-2 ${
+            isDarkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-50 text-black border-gray-300'
+          }`}>
             {r.content}
           </li>
         ))}
@@ -69,7 +73,11 @@ export default function DiscussionDetail() {
       <textarea
         value={replyText}
         onChange={(e) => setReplyText(e.target.value)}
-        className="w-full p-3 rounded border mb-3 bg-var-surface text-var-text placeholder-var-muted focus:outline-none focus:ring-2 focus:ring-var-accent"
+        className={`w-full p-3 rounded border mb-3 focus:outline-none focus:ring-2 ${
+          isDarkMode 
+            ? 'bg-gray-800 text-white placeholder-gray-500 border-gray-700 focus:ring-yellow-500' 
+            : 'bg-white text-black placeholder-gray-400 border-gray-300 focus:ring-yellow-600'
+        }`}
         placeholder="Write a reply..."
       />
       <button
