@@ -7,14 +7,7 @@ const navItems = [
   { label: "Dashboard", href: "/" },
   { label: "Marketplace", href: "/marketplace" },
   { label: "Discussion Board", href: "/discussions" },
-  "Media",
-  "Pages",
-  "Comments",
-  "Appearance",
-  "Plugins",
-  "Users",
   "Settings",
-  "Tools",
 ];
 
 export default function Sidebar() {
