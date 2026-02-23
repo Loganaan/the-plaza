@@ -3,6 +3,17 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
+  // Clear existing data in correct order (respecting foreign key constraints)
+  await prisma.message.deleteMany();
+  await prisma.conversation.deleteMany();
+  await prisma.reply.deleteMany();
+  await prisma.discussion.deleteMany();
+  await prisma.listing.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log('Cleared existing data');
+
   // Create users
   const seller = await prisma.user.create({
     data: {
