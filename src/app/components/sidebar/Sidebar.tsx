@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -13,7 +13,21 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Initialize from localStorage to prevent flash
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('sidebarCollapsed');
+      return savedState === 'true';
+    }
+    return false;
+  });
+
+  // Save collapsed state to localStorage whenever it changes
+  const toggleCollapse = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', String(newState));
+  };
 
   return (
     <aside
@@ -27,7 +41,7 @@ export default function Sidebar() {
           } pb-4`}>
           {!isCollapsed && <h1 className="text-2xl font-bold whitespace-nowrap">The Plaza</h1>}
           <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={toggleCollapse}
             className={`${isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"} p-2 rounded-lg transition-colors`}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
