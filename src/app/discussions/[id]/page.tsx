@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTheme } from '@/app/context/ThemeContext';
 
 interface Discussion {
@@ -18,6 +18,7 @@ interface Reply {
 
 export default function DiscussionDetail() {
   const { id } = useParams();
+  const router = useRouter();
   const { isDarkMode } = useTheme();
   const [discussion, setDiscussion] = useState<Discussion | null>(null);
   const [replies, setReplies] = useState<Reply[]>([]);
@@ -53,6 +54,15 @@ export default function DiscussionDetail() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      {/* Back Button */}
+      <button
+        onClick={() => router.push('/discussions')}
+        className="mb-4 px-4 py-2 rounded text-black font-semibold
+                   bg-gradient-to-r from-[#F7C600] to-[#C97A00] hover:opacity-90 transition"
+      >
+        ← Back to Discussions
+      </button>
+      
       {/* Title & Description */}
       <h1 className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>{discussion.title}</h1>
       <p className={`mb-6 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{discussion.description}</p>
