@@ -31,7 +31,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`${isCollapsed ? 'w-20' : 'w-64'} transition-all duration-300 ${
+      className={`${isCollapsed ? 'w-20' : 'w-64'} transition-[width] duration-300 ${
         isDarkMode ? "bg-[#1c1c1c]" : "bg-white border-r border-gray-300"
       } flex flex-col justify-between p-4`}
     >
