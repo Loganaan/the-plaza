@@ -132,7 +132,62 @@ async function main() {
     },
   });
 
-  console.log('Seeded database with users, categories, listings, conversations, and messages');
+  // Create discussions with replies
+  await prisma.discussion.create({
+    data: {
+      title: 'Best study spots on campus?',
+      description: 'Where do you all go to study when you need to focus?',
+      replies: {
+        create: [
+          {
+            content: 'The top floor of the library is very quiet. Tons of study rooms you can reserve too.',
+          },
+          {
+            content: 'The entrance section of the library is very good too, you can even after they close.',
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.discussion.create({
+    data: {
+      title: 'Need help with Calculus 2?',
+      description: 'Struggling with integration techniques and series. Anyone know of good tutors or study groups?',
+      replies: {
+        create: [
+          {
+            content: 'The Math Learning Center offers free tutoring. I go there all the time.',
+          },
+          {
+            content: 'Professor Lenard has amazing YouTube videos on calc 2. Seriously saved my grade.',
+          },
+          {
+            content: 'I\'m in calc 2 right now - want to start a study group? We could meet weekly at the library.',
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.discussion.create({
+    data: {
+      title: 'Tips for managing course load?',
+      description: 'Taking 18 credits this semester and feeling overwhelmed. How do you all balance everything?',
+      replies: {
+        create: [
+          {
+            content: 'Use a planner! I write down all assignments and due dates at the start of the semester. Game changer.',
+          },
+          {
+            content: 'Time blocking helped me a lot. Dedicate specific hours to each class and stick to it.',
+          },
+        ],
+      },
+    },
+  });
+
+  console.log('Seeded database with users, categories, listings, conversations, messages, discussions, and replies');
 }
 
 main()
