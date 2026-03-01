@@ -14,6 +14,7 @@ export default function ListingDetailPage() {
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAltText, setShowAltText] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -131,6 +132,33 @@ export default function ListingDetailPage() {
                       d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                     />
                   </svg>
+                )}
+                {/* Alt button */}
+                <button
+                  onClick={() => setShowAltText(!showAltText)}
+                  className={`absolute bottom-3 right-3 px-3 py-1.5 text-sm font-semibold rounded transition-all z-10 ${
+                    isDarkMode 
+                      ? "bg-gray-900/80 text-white hover:bg-gray-900" 
+                      : "bg-white/80 text-gray-900 hover:bg-white"
+                  } shadow-md`}
+                  title="Show alt text"
+                >
+                  alt
+                </button>
+                {/* Alt text overlay */}
+                {showAltText && (
+                  <div
+                    onClick={() => setShowAltText(false)}
+                    className={`absolute inset-0 flex items-center justify-center p-6 z-20 cursor-pointer ${
+                      isDarkMode ? "bg-black/90" : "bg-white/95"
+                    }`}
+                  >
+                    <p className={`text-sm text-center ${
+                      isDarkMode ? "text-gray-200" : "text-gray-800"
+                    }`}>
+                      TEMP TEXT, TO BE FILLED IN ON LISTING CREATION
+                    </p>
+                  </div>
                 )}
               </div>
 
