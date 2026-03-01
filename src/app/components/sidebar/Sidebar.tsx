@@ -9,12 +9,9 @@ const navItems = [
   { label: "Discussion Board", href: "/discussions" },
   "Media",
   "Pages",
-  "Comments",
   "Appearance",
-  "Plugins",
-  "Users",
+  "Profile",
   "Settings",
-  "Tools",
 ];
 
 export default function Sidebar() {
