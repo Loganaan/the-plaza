@@ -4,12 +4,15 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface ThemeContextType {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+  isAdmin: boolean;
+  toggleAdmin: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -17,6 +20,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const storedTheme = localStorage.getItem("theme");
     if (storedTheme !== null) {
       setIsDarkMode(storedTheme === "dark");
+    }
+    const storedAdmin = localStorage.getItem("admin");
+    if (storedAdmin !== null) {
+      setIsAdmin(storedAdmin === "true");
     }
   }, []);
 
@@ -28,12 +35,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const toggleAdmin = () => {
+    setIsAdmin((prev) => {
+      const newValue = !prev;
+      localStorage.setItem("admin", newValue ? "true" : "false");
+      return newValue;
+    });
+  };
+
   if (!mounted) {
     return null;
   }
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+    <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode, isAdmin, toggleAdmin }}>
       {children}
     </ThemeContext.Provider>
   );

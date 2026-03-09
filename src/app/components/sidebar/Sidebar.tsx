@@ -12,7 +12,7 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { isDarkMode, toggleDarkMode, isAdmin, toggleAdmin } = useTheme();
   // Initialize from localStorage to prevent flash
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -82,22 +82,40 @@ export default function Sidebar() {
       {/* Bottom Controls */}
       <div className="space-y-4">
         {!isCollapsed && (
-          <div className="flex items-center justify-between px-2">
-            <span className="whitespace-nowrap">Dark Mode</span>
-            <button
-              onClick={toggleDarkMode}
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-300"
-              }`}
-              aria-label="Toggle dark mode"
-            >
-              <div
-                className={`absolute top-0.5 w-4 h-4 bg-yellow-400 rounded-full transition-transform ${
-                  isDarkMode ? "left-5" : "left-0.5"
+          <>
+            <div className="flex items-center justify-between px-2">
+              <span className="whitespace-nowrap">Dark Mode</span>
+              <button
+                onClick={toggleDarkMode}
+                className={`relative w-10 h-5 rounded-full transition-colors ${
+                  isDarkMode ? "bg-gray-700" : "bg-gray-300"
                 }`}
-              />
-            </button>
-          </div>
+                aria-label="Toggle dark mode"
+              >
+                <div
+                  className={`absolute top-0.5 w-4 h-4 bg-yellow-400 rounded-full transition-transform ${
+                    isDarkMode ? "left-5" : "left-0.5"
+                  }`}
+                />
+              </button>
+            </div>
+            <div className="flex items-center justify-between px-2">
+              <span className="whitespace-nowrap">Admin</span>
+              <button
+                onClick={toggleAdmin}
+                className={`relative w-10 h-5 rounded-full transition-colors ${
+                  isDarkMode ? "bg-gray-700" : "bg-gray-300"
+                }`}
+                aria-label="Toggle admin mode"
+              >
+                <div
+                  className={`absolute top-0.5 w-4 h-4 bg-yellow-400 rounded-full transition-transform ${
+                    isAdmin ? "left-5" : "left-0.5"
+                  }`}
+                />
+              </button>
+            </div>
+          </>
         )}
         {isCollapsed ? (
           <button
