@@ -5,13 +5,16 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatBox from "./components/ChatBox";
 import type { ListingDetail } from "@/app/marketplace/types";
+import { useTheme } from "@/app/context/ThemeContext";
 
 export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { isDarkMode } = useTheme();
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAltText, setShowAltText] = useState(false);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -36,21 +39,21 @@ export default function ListingDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#121212] text-gray-200">
+      <div className={`flex min-h-screen ${isDarkMode ? 'bg-[#121212] text-gray-200' : 'bg-gray-100 text-gray-900'}`}>
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto animate-pulse">
             <div className="mb-6">
-              <div className="h-8 bg-gray-800 rounded w-1/4 mb-4"></div>
+              <div className={`h-8 rounded w-1/4 mb-4 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-300'}`}></div>
             </div>
-            <div className="bg-[#1c1c1c] rounded-lg p-8 shadow-lg">
+            <div className={`${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-white'} rounded-lg p-8 shadow-lg`}>
               <div className="grid grid-cols-2 gap-8">
-                <div className="bg-gray-800 h-96 rounded-lg"></div>
+                <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'} h-96 rounded-lg`}></div>
                 <div className="space-y-4">
-                  <div className="h-8 bg-gray-700 rounded w-3/4"></div>
-                  <div className="h-6 bg-gray-700 rounded w-1/4"></div>
-                  <div className="h-4 bg-gray-700 rounded w-full"></div>
-                  <div className="h-4 bg-gray-700 rounded w-full"></div>
-                  <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+                  <div className={`h-8 rounded w-3/4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-6 rounded w-1/4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded w-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded w-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
+                  <div className={`h-4 rounded w-2/3 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'}`}></div>
                 </div>
               </div>
             </div>
@@ -62,17 +65,17 @@ export default function ListingDetailPage() {
 
   if (error || !listing) {
     return (
-      <div className="flex min-h-screen bg-[#121212] text-gray-200">
+      <div className={`flex min-h-screen ${isDarkMode ? 'bg-[#121212] text-gray-200' : 'bg-gray-100 text-gray-900'}`}>
         <main className="flex-1 p-8">
           <div className="max-w-6xl mx-auto">
             <button
               onClick={() => router.push('/marketplace')}
-              className="mb-6 text-blue-400 hover:text-blue-300 flex items-center gap-2"
+              className={`mb-6 flex items-center gap-2 ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
             >
               ← Back to Marketplace
             </button>
-            <div className="bg-[#1c1c1c] rounded-lg p-8 text-center">
-              <p className="text-red-400">{error || 'Listing not found'}</p>
+            <div className={`${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-white'} rounded-lg p-8 text-center`}>
+              <p className={`${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{error || 'Listing not found'}</p>
             </div>
           </div>
         </main>
@@ -81,12 +84,12 @@ export default function ListingDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#121212] text-gray-200">
+    <div className={`flex min-h-screen ${isDarkMode ? 'bg-[#121212] text-gray-200' : 'bg-gray-100 text-gray-900'}`}>
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => router.push('/marketplace')}
-            className="mb-6 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors"
+            className={`mb-6 flex items-center gap-2 transition-colors ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -103,10 +106,10 @@ export default function ListingDetailPage() {
             Back to Marketplace
           </button>
 
-          <div className="bg-[#1c1c1c] rounded-lg p-8 shadow-lg mb-6">
+          <div className={`${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-white'} rounded-lg p-8 shadow-lg mb-6`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Image */}
-              <div className="bg-gray-800 h-96 rounded-lg flex items-center justify-center text-gray-600 overflow-hidden relative">
+              <div className={`${isDarkMode ? 'bg-gray-800 text-gray-600' : 'bg-gray-200 text-gray-400'} h-96 rounded-lg flex items-center justify-center overflow-hidden relative`}>
                 {listing.imageUrl ? (
                   <Image
                     src={listing.imageUrl}
@@ -130,6 +133,33 @@ export default function ListingDetailPage() {
                     />
                   </svg>
                 )}
+                {/* Alt button */}
+                <button
+                  onClick={() => setShowAltText(!showAltText)}
+                  className={`absolute bottom-3 right-3 px-3 py-1.5 text-sm font-semibold rounded transition-all z-10 ${
+                    isDarkMode 
+                      ? "bg-gray-900/80 text-white hover:bg-gray-900" 
+                      : "bg-white/80 text-gray-900 hover:bg-white"
+                  } shadow-md`}
+                  title="Show alt text"
+                >
+                  alt
+                </button>
+                {/* Alt text overlay */}
+                {showAltText && (
+                  <div
+                    onClick={() => setShowAltText(false)}
+                    className={`absolute inset-0 flex items-center justify-center p-6 z-20 cursor-pointer ${
+                      isDarkMode ? "bg-black/90" : "bg-white/95"
+                    }`}
+                  >
+                    <p className={`text-sm text-center ${
+                      isDarkMode ? "text-gray-200" : "text-gray-800"
+                    }`}>
+                      TEMP TEXT, TO BE FILLED IN ON LISTING CREATION
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Details */}
@@ -151,28 +181,28 @@ export default function ListingDetailPage() {
 
                 <div>
                   <h2 className="text-lg font-semibold mb-2">Description</h2>
-                  <p className="text-gray-400">
+                  <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
                     {listing.description || "No description available"}
                   </p>
                 </div>
 
-                <div className="border-t border-gray-700 pt-4 mt-auto">
-                  <h2 className="text-sm font-semibold mb-2 text-gray-400">Seller Information</h2>
+                <div className={`border-t pt-4 mt-auto ${isDarkMode ? 'border-gray-700' : 'border-gray-300'}`}>
+                  <h2 className={`text-sm font-semibold mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Seller Information</h2>
                   <p className="text-sm">
-                    <span className="text-gray-400">Name:</span>{" "}
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Name:</span>{" "}
                     {listing.seller.name || "Anonymous"}
                   </p>
                   <p className="text-sm">
-                    <span className="text-gray-400">Email:</span>{" "}
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Email:</span>{" "}
                     {listing.seller.email}
                   </p>
                   <p className="text-sm">
-                    <span className="text-gray-400">Listed:</span>{" "}
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Listed:</span>{" "}
                     {new Date(listing.dateListed).toLocaleDateString()}
                   </p>
                   <p className="text-sm">
-                    <span className="text-gray-400">Status:</span>{" "}
-                    <span className={`capitalize ${listing.status === 'active' ? 'text-green-400' : 'text-gray-400'}`}>
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>Status:</span>{" "}
+                    <span className={`capitalize ${listing.status === 'active' ? (isDarkMode ? 'text-green-400' : 'text-green-600') : (isDarkMode ? 'text-gray-400' : 'text-gray-600')}`}>
                       {listing.status}
                     </span>
                   </p>
