@@ -8,6 +8,9 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const discussions = await prisma.discussion.findMany({
+      include: {
+        category: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(discussions);

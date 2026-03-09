@@ -80,11 +80,19 @@ model Message {
 }
 
 
+model DiscussionCategory {
+  id          Int          @id @default(autoincrement())
+  name        String
+  discussions Discussion[]
+}
+
 model Discussion {
-  id          Int      @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   title       String
   description String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime            @default(now())
+  category    DiscussionCategory? @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
   replies     Reply[]
 }
 

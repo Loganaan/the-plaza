@@ -5,12 +5,19 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SearchBar from './components/SearchBar';
 import DiscussionsGrid from './components/DiscussionsGrid';
+import CategoryFilter from './components/CategoryFilter';
+
+interface DiscussionCategory {
+  id: number;
+  name: string;
+}
 
 interface Discussion {
   id: string;
   title: string;
   description: string;
   createdAt: string;
+  category: DiscussionCategory | null;
 }
 
 export default function DiscussionsPage() {
@@ -18,6 +25,7 @@ export default function DiscussionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState<string>(''); 
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDiscussions = async () => {
@@ -36,13 +44,30 @@ export default function DiscussionsPage() {
     fetchDiscussions();
   }, []);
 
-  const filteredDiscussions = search
-    ? discussions.filter(
-        (d) =>
-          d.title.toLowerCase().includes(search.toLowerCase()) ||
-          d.description.toLowerCase().includes(search.toLowerCase())
-      )
-    : discussions;
+  // Get unique categories from discussions
+  const categories = Array.from(
+    new Set(discussions.map(d => d.category?.name).filter(Boolean))
+  ) as string[];
+
+  // Filter discussions by search and category
+  const filteredDiscussions = discussions.filter((d) => {
+    const matchesSearch = search
+      ? d.title.toLowerCase().includes(search.toLowerCase()) ||
+        d.description.toLowerCase().includes(search.toLowerCase()) ||
+        (d.category?.name.toLowerCase().includes(search.toLowerCase()) ?? false)
+      : true;
+    
+    const matchesCategory = selectedCategory
+      ? d.category?.name === selectedCategory
+      : true;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    setSearch(""); // Clear search when selecting a category
+  };
 
   return (
     <div className="p-6">
@@ -63,8 +88,20 @@ export default function DiscussionsPage() {
         </Link>
       </div>
 
+      {/* Category Filter */}
+      <CategoryFilter 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategorySelect={setSelectedCategory}
+      />
+
       {/* Grid */}
-      <DiscussionsGrid discussions={filteredDiscussions} loading={loading} error={error} />
+      <DiscussionsGrid 
+        discussions={filteredDiscussions} 
+        loading={loading} 
+        error={error}
+        onCategoryClick={handleCategoryClick}
+      />
     </div>
   );
 }
