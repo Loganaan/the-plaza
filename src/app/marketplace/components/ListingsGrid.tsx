@@ -68,6 +68,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
         const ListingCard = () => {
           const [isHovered, setIsHovered] = useState(false);
           const [showAltText, setShowAltText] = useState(false);
+          const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
           
           return (
             <div
@@ -196,7 +197,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Delete functionality to be implemented
+                      setShowDeleteConfirm(true);
                     }}
                     className="mt-2 w-full py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded transition-colors"
                   >
@@ -204,6 +205,60 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                   </button>
                 )}
               </div>
+              
+              {/* Delete Confirmation Modal */}
+              {showDeleteConfirm && (
+                <div 
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteConfirm(false);
+                  }}
+                >
+                  <div 
+                    className={`rounded-lg p-6 max-w-md w-full mx-4 shadow-xl ${
+                      isDarkMode ? "bg-[#2c2c2c]" : "bg-white"
+                    }`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <h3 className={`text-lg font-semibold mb-4 ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}>
+                      Confirm Deletion
+                    </h3>
+                    <p className={`mb-6 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}>
+                      Are you sure you wish to delete this listing?
+                    </p>
+                    <div className="flex gap-3 justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteConfirm(false);
+                        }}
+                        className={`px-4 py-2 rounded font-semibold transition-colors ${
+                          isDarkMode 
+                            ? "bg-gray-700 hover:bg-gray-600 text-white" 
+                            : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+                        }`}
+                      >
+                        No
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Delete functionality to be implemented
+                          setShowDeleteConfirm(false);
+                        }}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition-colors"
+                      >
+                        Yes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         };
