@@ -15,7 +15,7 @@ interface ListingsGridProps {
 
 const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, onCategoryClick }) => {
   const router = useRouter();
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, isAdmin } = useTheme();
 
   if (loading) {
     return (
@@ -192,6 +192,17 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                 }`}>
                   Listed: {new Date(listing.dateListed).toLocaleDateString()}
                 </p>
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Delete functionality to be implemented
+                    }}
+                    className="mt-2 w-full py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded transition-colors"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           );
