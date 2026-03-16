@@ -12,6 +12,7 @@ export default function Marketplace() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newPrice, setNewPrice] = useState("");
@@ -46,6 +47,26 @@ export default function Marketplace() {
         (l.category?.field.toLowerCase().includes(search.toLowerCase()) ?? false)
       )
     : listings;
+
+  const sortedListings = [...filteredListings].sort((a, b) => {
+    if (sortBy === "az") {
+      return a.title.localeCompare(b.title);
+    }
+
+    if (sortBy === "za") {
+      return b.title.localeCompare(a.title);
+    }
+
+    if (sortBy === "priceHighLow") {
+      return b.price - a.price;
+    }
+
+    if (sortBy === "priceLowHigh") {
+      return a.price - b.price;
+    }
+
+    return 0;
+  });
 
   const handleCategoryClick = (category: string) => {
     setSearch(category);
@@ -109,9 +130,35 @@ export default function Marketplace() {
           Quick Listing
         </button>
       </div>
-      <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <label
+            htmlFor="marketplace-sort"
+            className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+          >
+            Sort By
+          </label>
+          <select
+            id="marketplace-sort"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className={`rounded-md px-3 py-2 text-sm border outline-none ${
+              isDarkMode
+                ? "bg-[#2c2c2c] border-gray-700 text-gray-200"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
+          >
+            <option value="default">Default</option>
+            <option value="az">Alphabetically (A to Z)</option>
+            <option value="za">Alphabetically (Z to A)</option>
+            <option value="priceHighLow">Pricing (High to Low)</option>
+            <option value="priceLowHigh">Pricing (Low to High)</option>
+          </select>
+        </div>
+      </div>
       <ListingsGrid 
-        listings={filteredListings} 
+        listings={sortedListings} 
         loading={loading} 
         error={error} 
         onCategoryClick={handleCategoryClick}
