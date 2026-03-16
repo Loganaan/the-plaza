@@ -89,6 +89,7 @@ export default function Marketplace() {
         loading={loading} 
         error={error} 
         onCategoryClick={handleCategoryClick}
+        showMine={showMine}
       />
     </>
   );
