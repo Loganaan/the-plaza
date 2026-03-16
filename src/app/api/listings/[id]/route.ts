@@ -214,3 +214,49 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
+
+    if (!userId || Number.isNaN(userId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const listingId = parseInt(id, 10);
+
+    if (isNaN(listingId)) {
+      return NextResponse.json({ error: 'Invalid listing ID' }, { status: 400 });
+    }
+
+    const existingListing = await prisma.listing.findUnique({
+      where: { id: listingId },
+      select: { sellerId: true },
+    });
+
+    if (!existingListing) {
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+    }
+
+    if (existingListing.sellerId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    await prisma.listing.delete({
+      where: { id: listingId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting listing:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete listing' },
+      { status: 500 }
+    );
+  }
+}
