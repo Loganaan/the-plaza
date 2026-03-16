@@ -74,6 +74,32 @@ export default function EditListing() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!window.confirm('Delete this listing? This cannot be undone.')) {
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/listings/${params.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || 'Failed to delete listing');
+      }
+
+      router.push('/marketplace');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete listing');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6 max-w-3xl mx-auto">
@@ -150,6 +176,14 @@ export default function EditListing() {
             className="px-4 py-2 rounded text-black font-semibold bg-gradient-to-r from-[#F7C600] to-[#C97A00] hover:opacity-90 transition disabled:opacity-60"
           >
             {submitting ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={submitting}
+            className="px-4 py-2 rounded border border-red-400 text-red-500 hover:bg-red-50 transition disabled:opacity-60"
+          >
+            Delete Listing
           </button>
           <button
             type="button"

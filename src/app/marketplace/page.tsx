@@ -59,6 +59,23 @@ export default function Marketplace() {
     setSearch(category);
   };
 
+  const handleDeleteListing = async (listingId: number) => {
+    try {
+      const response = await fetch(`/api/listings/${listingId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to delete listing");
+      }
+
+      setListings((prev) => prev.filter((listing) => listing.id !== listingId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete listing");
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -90,6 +107,7 @@ export default function Marketplace() {
         error={error} 
         onCategoryClick={handleCategoryClick}
         showMine={showMine}
+        onDeleteListing={handleDeleteListing}
       />
     </>
   );

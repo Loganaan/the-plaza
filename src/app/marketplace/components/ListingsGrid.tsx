@@ -13,6 +13,7 @@ interface ListingsGridProps {
   error: string | null;
   onCategoryClick?: (category: string) => void;
   showMine?: boolean;
+  onDeleteListing?: (listingId: number) => void;
 }
 
 const ListingsGrid: React.FC<ListingsGridProps> = ({
@@ -21,6 +22,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
   error,
   onCategoryClick,
   showMine = false,
+  onDeleteListing,
 }) => {
   const router = useRouter();
   const { isDarkMode } = useTheme();
@@ -162,7 +164,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
           </div>
               <div className="relative z-10">
                 {showMine && (
-                  <div className="absolute right-0 top-0">
+                  <div className="absolute right-0 top-0 flex items-center gap-2">
                     <Link
                       href={`/marketplace/${listing.id}/edit`}
                       onClick={(e) => e.stopPropagation()}
@@ -174,6 +176,23 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
                     >
                       Edit
                     </Link>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!onDeleteListing) return;
+                        if (window.confirm("Delete this listing? This cannot be undone.")) {
+                          onDeleteListing(listing.id);
+                        }
+                      }}
+                      className={`text-xs font-semibold px-2 py-1 rounded border transition ${
+                        isDarkMode
+                          ? "border-red-500 text-red-400 hover:bg-red-900/20"
+                          : "border-red-300 text-red-500 hover:bg-red-50"
+                      }`}
+                    >
+                      Delete
+                    </button>
                   </div>
                 )}
                 <p 
