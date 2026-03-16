@@ -43,6 +43,10 @@ export default function Marketplace() {
     setSearch(category);
   };
 
+  const handleListingDeleted = (listingId: number) => {
+    setListings((prevListings) => prevListings.filter((listing) => listing.id !== listingId));
+  };
+
   return (
     <>
       <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
@@ -51,6 +55,7 @@ export default function Marketplace() {
         loading={loading} 
         error={error} 
         onCategoryClick={handleCategoryClick}
+        onListingDeleted={handleListingDeleted}
       />
     </>
   );

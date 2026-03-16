@@ -11,9 +11,10 @@ interface ListingsGridProps {
   loading: boolean;
   error: string | null;
   onCategoryClick?: (category: string) => void;
+  onListingDeleted?: (listingId: number) => void;
 }
 
-const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, onCategoryClick }) => {
+const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, onCategoryClick, onListingDeleted }) => {
   const router = useRouter();
   const { isDarkMode, isAdmin } = useTheme();
 
@@ -69,6 +70,37 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
           const [isHovered, setIsHovered] = useState(false);
           const [showAltText, setShowAltText] = useState(false);
           const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+          const [isDeleting, setIsDeleting] = useState(false);
+          const [deleteError, setDeleteError] = useState<string | null>(null);
+
+          const handleDeleteListing = async (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+
+            if (isDeleting) {
+              return;
+            }
+
+            setIsDeleting(true);
+            setDeleteError(null);
+
+            try {
+              const response = await fetch(`/api/listings/${listing.id}`, {
+                method: "DELETE",
+              });
+
+              if (!response.ok) {
+                const data = await response.json().catch(() => null);
+                throw new Error(data?.error || "Failed to delete listing");
+              }
+
+              onListingDeleted?.(listing.id);
+              setShowDeleteConfirm(false);
+            } catch (err) {
+              setDeleteError(err instanceof Error ? err.message : "Failed to delete listing");
+            } finally {
+              setIsDeleting(false);
+            }
+          };
           
           return (
             <div
@@ -231,12 +263,16 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                     }`}>
                       Are you sure you wish to delete this listing?
                     </p>
+                    {deleteError && (
+                      <p className="mb-4 text-sm text-red-500">{deleteError}</p>
+                    )}
                     <div className="flex gap-3 justify-end">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowDeleteConfirm(false);
                         }}
+                        disabled={isDeleting}
                         className={`px-4 py-2 rounded font-semibold transition-colors ${
                           isDarkMode 
                             ? "bg-gray-700 hover:bg-gray-600 text-white" 
@@ -246,14 +282,11 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                         No
                       </button>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Delete functionality to be implemented
-                          setShowDeleteConfirm(false);
-                        }}
+                        onClick={handleDeleteListing}
+                        disabled={isDeleting}
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition-colors"
                       >
-                        Yes
+                        {isDeleting ? "Deleting..." : "Yes"}
                       </button>
                     </div>
                   </div>
