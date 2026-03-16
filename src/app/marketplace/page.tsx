@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { Listing } from "@/app/marketplace/types.ts";
 import SearchBar from "./components/SearchBar";
 import ListingsGrid from "./components/ListingsGrid";
@@ -45,7 +46,15 @@ export default function Marketplace() {
 
   return (
     <>
-      <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+        <Link
+          href="/marketplace/new"
+          className="inline-flex items-center justify-center rounded px-4 py-2 text-black font-semibold bg-gradient-to-r from-[#F7C600] to-[#C97A00] hover:opacity-90 transition"
+        >
+          Create Listing
+        </Link>
+      </div>
       <ListingsGrid 
         listings={filteredListings} 
         loading={loading} 
