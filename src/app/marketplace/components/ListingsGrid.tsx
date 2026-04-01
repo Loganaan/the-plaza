@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import type { Listing } from "@/app/marketplace/types.ts";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -15,7 +15,6 @@ interface ListingsGridProps {
 }
 
 const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, onCategoryClick, onListingDeleted }) => {
-  const router = useRouter();
   const { isDarkMode, isAdmin } = useTheme();
 
   if (loading) {
@@ -121,34 +120,40 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                   style={{ opacity: isHovered ? 0.5 : 0 }}
                 />
               )}
-          <div 
-            onClick={() => router.push(`/marketplace/${listing.id}`)}
-            className={`h-40 rounded-lg flex items-center justify-center overflow-hidden relative cursor-pointer ${
+          <div
+            className={`h-40 rounded-lg overflow-hidden relative ${
               isDarkMode ? "bg-gray-800 text-gray-600" : "bg-gray-200 text-gray-400"
-            }`}>
-            {listing.imageUrl ? (
-              <Image
-                src={listing.imageUrl}
-                alt={listing.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            }`}
+          >
+            <Link
+              href={`/marketplace/${listing.id}`}
+              aria-label={`View listing: ${listing.title}`}
+              className="absolute inset-0 z-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500"
+            >
+              {listing.imageUrl ? (
+                <Image
+                  src={listing.imageUrl}
+                  alt={listing.title}
+                  fill
+                  className="object-cover"
                 />
-              </svg>
-            )}
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-10 w-10"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              )}
+            </Link>
             {/* Alt button */}
             {isHovered && (
               <button
@@ -186,15 +191,15 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
             )}
           </div>
               <div className="relative z-10">
-                <p 
-                  onClick={() => router.push(`/marketplace/${listing.id}`)}
-                  className={`text-sm font-semibold truncate transition-colors cursor-pointer hover:underline ${
+                <Link
+                  href={`/marketplace/${listing.id}`}
+                  className={`text-sm font-semibold truncate transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${
                     isDarkMode ? (isHovered ? "text-white" : "text-gray-200") : "text-gray-900"
-                  }`} 
+                  }`}
                   title={listing.title}
                 >
                   {listing.title}
-                </p>
+                </Link>
                 <p className={`text-sm font-bold transition-colors ${
                   isDarkMode ? (isHovered ? "text-green-300" : "text-green-400") : "text-green-600"
                 }`}>
@@ -206,19 +211,20 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                   {listing.description || "No description available"}
                 </p>
                 {listing.category && (
-                  <p 
+                  <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (listing.category) {
                         onCategoryClick?.(listing.category.field);
                       }
                     }}
-                    className={`text-xs mt-1 transition-colors cursor-pointer hover:underline ${
+                    className={`text-xs mt-1 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${
                       isDarkMode ? (isHovered ? "text-yellow-200" : "text-yellow-400") : "text-yellow-600 hover:text-yellow-800"
                     }`}
                   >
                     {listing.category.field}
-                  </p>
+                  </button>
                 )}
                 <p className={`text-xs mt-1 transition-colors ${
                   isDarkMode ? (isHovered ? "text-gray-300" : "text-gray-500") : "text-gray-500"
