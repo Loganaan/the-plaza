@@ -71,6 +71,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
           const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
           const [isDeleting, setIsDeleting] = useState(false);
           const [deleteError, setDeleteError] = useState<string | null>(null);
+          const categoryField = listing.category?.field?.trim();
 
           const handleDeleteListing = async (e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
@@ -128,7 +129,7 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
             <Link
               href={`/marketplace/${listing.id}`}
               aria-label={`View listing: ${listing.title}`}
-              className="absolute inset-0 z-0 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500"
+              className="absolute inset-0 z-0 flex items-center justify-center rounded-lg border-2 border-transparent focus:outline-none focus-visible:border-cyan-400"
             >
               {listing.imageUrl ? (
                 <Image
@@ -210,20 +211,18 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
                 }`}>
                   {listing.description || "No description available"}
                 </p>
-                {listing.category && (
+                {categoryField && (
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (listing.category) {
-                        onCategoryClick?.(listing.category.field);
-                      }
+                      onCategoryClick?.(categoryField);
                     }}
                     className={`text-xs mt-1 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${
                       isDarkMode ? (isHovered ? "text-yellow-200" : "text-yellow-400") : "text-yellow-600 hover:text-yellow-800"
                     }`}
                   >
-                    {listing.category.field}
+                    {categoryField}
                   </button>
                 )}
                 <p className={`text-xs mt-1 transition-colors ${
