@@ -19,9 +19,11 @@ export default function NewDiscussion() {
       alert('Discussion created!');
       setTitle('');
       setDescription('');
-    } else {
-      alert('Failed to create discussion');
+      return;
     }
+
+    const data = await res.json().catch(() => ({}));
+    alert(data?.error || 'Failed to create discussion');
   };
 
   return (
