@@ -8,6 +8,7 @@ async function main() {
   await prisma.conversation.deleteMany();
   await prisma.reply.deleteMany();
   await prisma.discussion.deleteMany();
+  await prisma.discussionCategory.deleteMany();
   await prisma.listing.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
@@ -36,12 +37,65 @@ async function main() {
     data: { field: 'Textbooks' },
   });
 
+  const calculators = await prisma.category.create({
+    data: { field: 'Calculators' },
+  });
+
+  const laptops = await prisma.category.create({
+    data: { field: 'Laptops & Computers' },
+  });
+
+  const labEquipment = await prisma.category.create({
+    data: { field: 'Lab Equipment' },
+  });
+
+  const courseMaterials = await prisma.category.create({
+    data: { field: 'Course Materials' },
+  });
+
+  const studyGuides = await prisma.category.create({
+    data: { field: 'Study Guides' },
+  });
+
   const electronics = await prisma.category.create({
     data: { field: 'Electronics' },
   });
 
   const furniture = await prisma.category.create({
     data: { field: 'Furniture' },
+  });
+
+  const other = await prisma.category.create({
+    data: { field: 'Other' },
+  });
+
+  // Create discussion categories
+  const academicHelp = await prisma.discussionCategory.create({
+    data: { name: 'Academic Help' },
+  });
+
+  const housing = await prisma.discussionCategory.create({
+    data: { name: 'Housing' },
+  });
+
+  const events = await prisma.discussionCategory.create({
+    data: { name: 'Events' },
+  });
+
+  const jobs = await prisma.discussionCategory.create({
+    data: { name: 'Jobs & Internships' },
+  });
+
+  const studyTips = await prisma.discussionCategory.create({
+    data: { name: 'Study Tips' },
+  });
+
+  const campusLife = await prisma.discussionCategory.create({
+    data: { name: 'Campus Life' },
+  });
+
+  const general = await prisma.discussionCategory.create({
+    data: { name: 'General' },
   });
 
   // Create listings with conversations and messages
@@ -85,7 +139,7 @@ async function main() {
       price: 1200,
       imageUrl: '/laptop.png',
       status: 'active',
-      categoryId: electronics.id,
+      categoryId: laptops.id,
       sellerId: seller.id,
       conversations: {
         create: {
@@ -113,6 +167,39 @@ async function main() {
           },
         },
       },
+    },
+  });
+
+  await prisma.listing.create({
+    data: {
+      title: 'TI-84 Plus Calculator',
+      description: 'Graphing calculator for math courses, barely used',
+      price: 80,
+      status: 'active',
+      categoryId: calculators.id,
+      sellerId: seller.id,
+    },
+  });
+
+  await prisma.listing.create({
+    data: {
+      title: 'Chemistry Lab Goggles',
+      description: 'Safety goggles for chemistry lab, brand new',
+      price: 15,
+      status: 'active',
+      categoryId: labEquipment.id,
+      sellerId: seller.id,
+    },
+  });
+
+  await prisma.listing.create({
+    data: {
+      title: 'Biology Study Guide',
+      description: 'Comprehensive study guide for BIO 101',
+      price: 20,
+      status: 'active',
+      categoryId: studyGuides.id,
+      sellerId: seller.id,
     },
   });
 
@@ -148,6 +235,7 @@ async function main() {
     data: {
       title: 'Best study spots on campus?',
       description: 'Where do you all go to study when you need to focus?',
+      categoryId: campusLife.id,
       replies: {
         create: [
           {
@@ -165,6 +253,7 @@ async function main() {
     data: {
       title: 'Need help with Calculus 2?',
       description: 'Struggling with integration techniques and series. Anyone know of good tutors or study groups?',
+      categoryId: academicHelp.id,
       replies: {
         create: [
           {
@@ -185,6 +274,7 @@ async function main() {
     data: {
       title: 'Tips for managing course load?',
       description: 'Taking 18 credits this semester and feeling overwhelmed. How do you all balance everything?',
+      categoryId: studyTips.id,
       replies: {
         create: [
           {
@@ -195,6 +285,22 @@ async function main() {
           },
         ],
       },
+    },
+  });
+
+  await prisma.discussion.create({
+    data: {
+      title: 'Looking for roommate for next semester',
+      description: 'Need someone to share a 2BR apartment near campus. Rent is $600/month.',
+      categoryId: housing.id,
+    },
+  });
+
+  await prisma.discussion.create({
+    data: {
+      title: 'Software engineering internship opportunities',
+      description: 'Has anyone heard back from tech companies for summer internships?',
+      categoryId: jobs.id,
     },
   });
 

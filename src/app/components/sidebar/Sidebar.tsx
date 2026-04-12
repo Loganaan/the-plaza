@@ -1,7 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTheme } from "../../context/ThemeContext";
+import { useSession, signIn, signOut } from "next-auth/react";
+import Image from "next/image";
 
 const navItems = [
   { label: "Dashboard", href: "/" },
@@ -13,6 +15,7 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isDarkMode, toggleDarkMode, isAdmin, toggleAdmin } = useTheme();
+  const { data: session } = useSession();
   // Initialize from localStorage to prevent flash
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -81,6 +84,45 @@ export default function Sidebar() {
       </div>
       {/* Bottom Controls */}
       <div className="space-y-4">
+        {/* User info */}
+        {session?.user && !isCollapsed && (
+          <div className={`flex items-center gap-3 px-2 py-2 rounded-lg ${
+            isDarkMode ? "bg-[#2a2a2a]" : "bg-gray-100"
+          }`}>
+            {session.user.image ? (
+              <Image
+                src={session.user.image}
+                alt={session.user.name ?? "User"}
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-sm">
+                {session.user.name?.[0] ?? "U"}
+              </div>
+            )}
+            <span className="text-sm font-medium truncate">{session.user.name}</span>
+          </div>
+        )}
+        {session?.user && isCollapsed && (
+          <div className="flex justify-center">
+            {session.user.image ? (
+              <Image
+                src={session.user.image}
+                alt={session.user.name ?? "User"}
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-sm">
+                {session.user.name?.[0] ?? "U"}
+              </div>
+            )}
+          </div>
+        )}
+
         {!isCollapsed && (
           <>
             <div className="flex items-center justify-between px-2">
@@ -125,9 +167,19 @@ export default function Sidebar() {
           >
             {isDarkMode ? "🌙" : "☀️"}
           </button>
-        ) : (
-          <button className="w-full py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-semibold">
+        ) : session?.user ? (
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="w-full py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-semibold hover:opacity-90 transition"
+          >
             Logout
+          </button>
+        ) : (
+          <button
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+            className="w-full py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-black font-semibold hover:opacity-90 transition"
+          >
+            Login
           </button>
         )}
       </div>

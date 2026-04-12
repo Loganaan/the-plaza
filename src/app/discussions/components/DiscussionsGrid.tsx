@@ -5,20 +5,27 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../../context/ThemeContext";
 
+interface DiscussionCategory {
+  id: number;
+  name: string;
+}
+
 interface Discussion {
   id: string;
   title: string;
   description: string;
   createdAt: string;
+  category: DiscussionCategory | null;
 }
 
 interface DiscussionsGridProps {
   discussions: Discussion[];
   loading: boolean;
   error: string | null;
+  onCategoryClick?: (category: string) => void;
 }
 
-const DiscussionsGrid: React.FC<DiscussionsGridProps> = ({ discussions, loading, error }) => {
+const DiscussionsGrid: React.FC<DiscussionsGridProps> = ({ discussions, loading, error, onCategoryClick }) => {
   const router = useRouter();
   const { isDarkMode } = useTheme();
 
@@ -75,6 +82,23 @@ const DiscussionsGrid: React.FC<DiscussionsGridProps> = ({ discussions, loading,
           <p className={`text-sm mb-3 line-clamp-3 ${isDarkMode ? "text-gray-400" : "text-gray-700"}`}>
             {d.description}
           </p>
+          {d.category && (
+            <div 
+              onClick={(e) => {
+                e.stopPropagation();
+                if (d.category) {
+                  onCategoryClick?.(d.category.name);
+                }
+              }}
+              className={`inline-block px-2 py-0.5 mb-2 rounded text-xs border cursor-pointer ${
+                isDarkMode 
+                  ? "bg-transparent text-gray-400 border-gray-700 hover:border-gray-600"
+                  : "bg-transparent text-gray-600 border-gray-300 hover:border-gray-500"
+              }`}
+            >
+              {d.category.name}
+            </div>
+          )}
           <p className={`text-xs ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
             Posted: {new Date(d.createdAt).toLocaleDateString()}
           </p>
