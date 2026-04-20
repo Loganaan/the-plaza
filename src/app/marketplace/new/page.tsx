@@ -137,13 +137,6 @@ export default function NewListing() {
             className="max-h-64 rounded border var-border object-cover"
           />
         )}
-        <input
-          type="url"
-          placeholder="Image URL (optional)"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          className="w-full p-3 rounded border var-border bg-var-surface text-var-text placeholder-var-muted focus:outline-none focus:ring-2 focus:ring-var-accent"
-        />
         <textarea
           placeholder="Description (optional)"
           value={description}
