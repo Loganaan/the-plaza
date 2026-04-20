@@ -15,12 +15,6 @@ export default function Marketplace() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("default");
-  const [showQuickCreate, setShowQuickCreate] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newPrice, setNewPrice] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [createError, setCreateError] = useState<string | null>(null);
   const [showMine, setShowMine] = useState(false);
   const { status } = useSession();
 
@@ -109,61 +103,10 @@ export default function Marketplace() {
     }
   };
 
-  const handleCreateListing = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (isCreating) {
-      return;
-    }
-
-    setIsCreating(true);
-    setCreateError(null);
-
-    try {
-      const response = await fetch("/api/listings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: newTitle,
-          price: Number(newPrice),
-          description: newDescription,
-        }),
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Failed to create listing");
-      }
-
-      setListings((prev) => [data as Listing, ...prev]);
-      setShowQuickCreate(false);
-      setNewTitle("");
-      setNewPrice("");
-      setNewDescription("");
-    } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Failed to create listing");
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
   return (
     <>
       <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              setCreateError(null);
-              setShowQuickCreate(true);
-            }}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded transition-colors"
-          >
-            Quick Listing
-          </button>
           <label
             htmlFor="marketplace-sort"
             className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
@@ -222,95 +165,6 @@ export default function Marketplace() {
         showMine={showMine}
         onDeleteListing={handleDeleteListing}
       />
-
-      {showQuickCreate && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={() => {
-            if (!isCreating) {
-              setShowQuickCreate(false);
-            }
-          }}
-        >
-          <form
-            onSubmit={handleCreateListing}
-            onClick={(e) => e.stopPropagation()}
-            className={`rounded-lg p-6 w-full max-w-md mx-4 shadow-xl ${
-              isDarkMode ? "bg-[#2c2c2c]" : "bg-white"
-            }`}
-          >
-            <h2 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-              Create Quick Listing
-            </h2>
-
-            <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="Title"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                required
-                className={`w-full rounded px-3 py-2 border outline-none ${
-                  isDarkMode
-                    ? "bg-[#1c1c1c] border-gray-700 text-gray-200 placeholder-gray-500"
-                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                }`}
-              />
-
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Price"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                required
-                className={`w-full rounded px-3 py-2 border outline-none ${
-                  isDarkMode
-                    ? "bg-[#1c1c1c] border-gray-700 text-gray-200 placeholder-gray-500"
-                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                }`}
-              />
-
-              <textarea
-                placeholder="Description (optional)"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                rows={3}
-                className={`w-full rounded px-3 py-2 border outline-none resize-none ${
-                  isDarkMode
-                    ? "bg-[#1c1c1c] border-gray-700 text-gray-200 placeholder-gray-500"
-                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
-                }`}
-              />
-            </div>
-
-            {createError && <p className="mt-3 text-sm text-red-500">{createError}</p>}
-
-            <div className="mt-5 flex justify-end gap-3">
-              <button
-                type="button"
-                disabled={isCreating}
-                onClick={() => setShowQuickCreate(false)}
-                className={`px-4 py-2 rounded font-semibold transition-colors ${
-                  isDarkMode
-                    ? "bg-gray-700 hover:bg-gray-600 text-white"
-                    : "bg-gray-200 hover:bg-gray-300 text-gray-900"
-                }`}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isCreating}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-semibold transition-colors"
-              >
-                {isCreating ? "Creating..." : "Create"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
     </>
   );
 }
