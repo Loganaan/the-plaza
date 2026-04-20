@@ -118,12 +118,24 @@ export default function NewListing() {
           onChange={(e) => setCategory(e.target.value)}
           className="w-full p-3 rounded border var-border bg-var-surface text-var-text placeholder-var-muted focus:outline-none focus:ring-2 focus:ring-var-accent"
         />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
-          className="w-full p-3 rounded border var-border bg-var-surface text-var-text placeholder-var-muted focus:outline-none focus:ring-2 focus:ring-var-accent"
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            id="listing-image"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
+            className="hidden"
+          />
+          <label
+            htmlFor="listing-image"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md border var-border bg-var-surface text-var-text font-semibold cursor-pointer hover:bg-var-muted/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-var-accent"
+          >
+            Upload image
+          </label>
+          <span className="text-sm text-var-muted">
+            {imageFile ? imageFile.name : "No file selected"}
+          </span>
+        </div>
         {uploadingImage && (
           <p className="text-sm text-var-muted">Uploading image...</p>
         )}
