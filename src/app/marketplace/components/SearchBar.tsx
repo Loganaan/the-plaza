@@ -52,7 +52,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, listings = [] })
   };
   
   return (
-    <div className="max-w-3xl mb-8">
+    <div className="max-w-3xl w-full">
       <div className={`flex items-center rounded-full px-4 py-2 relative gap-2 ${
         isDarkMode ? "bg-[#3a3a3a]" : "bg-gray-100 border border-gray-300"
       }`}>

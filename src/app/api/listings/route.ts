@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { auth } from '@/auth';
 import { findProfanity } from '@/lib/profanity';
@@ -34,66 +35,42 @@ export async function POST(request: Request) {
     const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
 
     if (!userId || Number.isNaN(userId)) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const {
-      title,
-      description,
-      price,
-      imageUrl,
-      category,
-    } = body as {
-      title?: string;
-      description?: string;
-      price?: number | string;
-      imageUrl?: string;
-      category?: string;
-    };
+    const title = typeof body.title === 'string' ? body.title.trim() : '';
+    const description = typeof body.description === 'string' ? body.description.trim() : null;
+    const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : null;
+    const parsedPrice = Number(body.price);
+    const categoryFromName = typeof body.category === 'string' ? body.category.trim() : '';
+    const categoryFromId = Number.isInteger(body.categoryId) ? body.categoryId : null;
 
-    if (!title || typeof title !== 'string') {
-      return new Response(JSON.stringify({ error: 'Title is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!title) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    const numericPrice = typeof price === 'string' ? Number(price) : price;
-    if (typeof numericPrice !== 'number' || !Number.isFinite(numericPrice)) {
-      return new Response(JSON.stringify({ error: 'Valid price is required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+      return NextResponse.json({ error: 'Price must be a valid non-negative number' }, { status: 400 });
     }
 
     const profanityHits = findProfanity(`${title} ${description ?? ''}`);
     if (profanityHits.length > 0) {
-      return new Response(
-        JSON.stringify({ error: 'Profanity is not allowed in listings' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
+      return NextResponse.json({ error: 'Profanity is not allowed in listings' }, { status: 400 });
     }
 
-    const trimmedCategory = typeof category === 'string' ? category.trim() : '';
-    let categoryId: number | null = null;
+    let categoryId: number | null = categoryFromId;
 
-    if (trimmedCategory) {
+    if (categoryFromName) {
       const existingCategory = await prisma.category.findFirst({
-        where: { field: trimmedCategory },
+        where: { field: categoryFromName },
       });
 
       if (existingCategory) {
         categoryId = existingCategory.id;
       } else {
         const createdCategory = await prisma.category.create({
-          data: { field: trimmedCategory },
+          data: { field: categoryFromName },
         });
         categoryId = createdCategory.id;
       }
@@ -101,10 +78,10 @@ export async function POST(request: Request) {
 
     const listing = await prisma.listing.create({
       data: {
-        title: title.trim(),
-        description: description?.trim() || null,
-        price: numericPrice,
-        imageUrl: imageUrl?.trim() || null,
+        title,
+        description: description || null,
+        price: parsedPrice,
+        imageUrl: imageUrl || null,
         sellerId: userId,
         categoryId,
       },
@@ -113,15 +90,9 @@ export async function POST(request: Request) {
       },
     });
 
-    return new Response(JSON.stringify(listing), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json(listing, { status: 201 });
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: 'Failed to create listing' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json({ error: 'Failed to create listing' }, { status: 500 });
   }
 }

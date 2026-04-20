@@ -6,12 +6,15 @@ import { useSession } from "next-auth/react";
 import type { Listing } from "@/app/marketplace/types.ts";
 import SearchBar from "./components/SearchBar";
 import ListingsGrid from "./components/ListingsGrid";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Marketplace() {
+  const { isDarkMode } = useTheme();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("default");
   const [showMine, setShowMine] = useState(false);
   const { status } = useSession();
 
@@ -55,8 +58,32 @@ export default function Marketplace() {
       )
     : listings;
 
+  const sortedListings = [...filteredListings].sort((a, b) => {
+    if (sortBy === "az") {
+      return a.title.localeCompare(b.title);
+    }
+
+    if (sortBy === "za") {
+      return b.title.localeCompare(a.title);
+    }
+
+    if (sortBy === "priceHighLow") {
+      return b.price - a.price;
+    }
+
+    if (sortBy === "priceLowHigh") {
+      return a.price - b.price;
+    }
+
+    return 0;
+  });
+
   const handleCategoryClick = (category: string) => {
     setSearch(category);
+  };
+
+  const handleListingDeleted = (listingId: number) => {
+    setListings((prevListings) => prevListings.filter((listing) => listing.id !== listingId));
   };
 
   const handleDeleteListing = async (listingId: number) => {
@@ -78,8 +105,36 @@ export default function Marketplace() {
 
   return (
     <>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="marketplace-sort"
+            className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
+          >
+            Sort By
+          </label>
+          <select
+            id="marketplace-sort"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className={`rounded-md px-3 py-2 text-sm border outline-none ${
+              isDarkMode
+                ? "bg-[#2c2c2c] border-gray-700 text-gray-200"
+                : "bg-white border-gray-300 text-gray-900"
+            }`}
+          >
+            <option value="default">Default</option>
+            <option value="az">Alphabetically (A to Z)</option>
+            <option value="za">Alphabetically (Z to A)</option>
+            <option value="priceHighLow">Pricing (High to Low)</option>
+            <option value="priceLowHigh">Pricing (Low to High)</option>
+          </select>
+        </div>
+
+        <div className="flex-1 lg:max-w-2xl">
+          <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+        </div>
+
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <button
             type="button"
@@ -102,10 +157,11 @@ export default function Marketplace() {
         </div>
       </div>
       <ListingsGrid 
-        listings={filteredListings} 
+        listings={sortedListings} 
         loading={loading} 
         error={error} 
         onCategoryClick={handleCategoryClick}
+        onListingDeleted={handleListingDeleted}
         showMine={showMine}
         onDeleteListing={handleDeleteListing}
       />
