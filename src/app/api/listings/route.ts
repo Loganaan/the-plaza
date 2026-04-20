@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { auth } from '@/auth';
+import { findProfanity } from '@/lib/profanity';
 
 const prisma = new PrismaClient();
 
@@ -67,6 +68,17 @@ export async function POST(request: Request) {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    const profanityHits = findProfanity(`${title} ${description ?? ''}`);
+    if (profanityHits.length > 0) {
+      return new Response(
+        JSON.stringify({ error: 'Profanity is not allowed in listings' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const trimmedCategory = typeof category === 'string' ? category.trim() : '';

@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { findProfanity } from '@/lib/profanity';
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,14 @@ export async function POST(req: Request) {
     const { title, description } = await req.json();
     if (!title || !description) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+    }
+
+    const profanityHits = findProfanity(`${title} ${description}`);
+    if (profanityHits.length > 0) {
+      return NextResponse.json(
+        { error: 'Profanity is not allowed in discussions' },
+        { status: 400 }
+      );
     }
 
     const discussion = await prisma.discussion.create({
