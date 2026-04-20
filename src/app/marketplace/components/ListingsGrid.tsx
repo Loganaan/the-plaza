@@ -12,9 +12,19 @@ interface ListingsGridProps {
   error: string | null;
   onCategoryClick?: (category: string) => void;
   onListingDeleted?: (listingId: number) => void;
+  showMine?: boolean;
+  onDeleteListing?: (listingId: number) => void;
 }
 
-const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, onCategoryClick, onListingDeleted }) => {
+const ListingsGrid: React.FC<ListingsGridProps> = ({
+  listings,
+  loading,
+  error,
+  onCategoryClick,
+  onListingDeleted,
+  showMine = false,
+  onDeleteListing,
+}) => {
   const { isDarkMode, isAdmin } = useTheme();
 
   if (loading) {
@@ -192,6 +202,38 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({ listings, loading, error, o
             )}
           </div>
               <div className="relative z-10">
+                {showMine && (
+                  <div className="absolute right-0 top-0 flex items-center gap-2">
+                    <Link
+                      href={`/marketplace/${listing.id}/edit`}
+                      onClick={(e) => e.stopPropagation()}
+                      className={`text-xs font-semibold px-2 py-1 rounded border transition ${
+                        isDarkMode
+                          ? "border-gray-600 text-gray-200 hover:bg-gray-800"
+                          : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!onDeleteListing) return;
+                        if (window.confirm("Delete this listing? This cannot be undone.")) {
+                          onDeleteListing(listing.id);
+                        }
+                      }}
+                      className={`text-xs font-semibold px-2 py-1 rounded border transition ${
+                        isDarkMode
+                          ? "border-red-500 text-red-400 hover:bg-red-900/20"
+                          : "border-red-300 text-red-500 hover:bg-red-50"
+                      }`}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
                 <Link
                   href={`/marketplace/${listing.id}`}
                   className={`text-sm font-semibold truncate transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${

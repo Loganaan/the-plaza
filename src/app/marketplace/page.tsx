@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import type { Listing } from "@/app/marketplace/types.ts";
 import SearchBar from "./components/SearchBar";
 import ListingsGrid from "./components/ListingsGrid";
@@ -19,25 +21,39 @@ export default function Marketplace() {
   const [newDescription, setNewDescription] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [showMine, setShowMine] = useState(false);
+  const { status } = useSession();
 
   useEffect(() => {
     const fetchListings = async () => {
+      if (showMine && status === "unauthenticated") {
+        setListings([]);
+        setError("Please log in to view your listings.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch('/api/listings');
+        setLoading(true);
+        setError(null);
+        const endpoint = showMine ? "/api/listings/mine" : "/api/listings";
+        const response = await fetch(endpoint);
         if (!response.ok) {
-          throw new Error('Failed to fetch listings');
+          throw new Error(showMine ? "Failed to fetch your listings" : "Failed to fetch listings");
         }
         const data = await response.json();
         setListings(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListings();
-  }, []);
+    if (status !== "loading") {
+      fetchListings();
+    }
+  }, [showMine, status]);
 
   // Optionally filter listings by search
   const filteredListings = search
@@ -74,6 +90,23 @@ export default function Marketplace() {
 
   const handleListingDeleted = (listingId: number) => {
     setListings((prevListings) => prevListings.filter((listing) => listing.id !== listingId));
+  };
+
+  const handleDeleteListing = async (listingId: number) => {
+    try {
+      const response = await fetch(`/api/listings/${listingId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to delete listing");
+      }
+
+      setListings((prev) => prev.filter((listing) => listing.id !== listingId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete listing");
+    }
   };
 
   const handleCreateListing = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -119,20 +152,18 @@ export default function Marketplace() {
 
   return (
     <>
-      <div className="mb-4">
-        <button
-          onClick={() => {
-            setCreateError(null);
-            setShowQuickCreate(true);
-          }}
-          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded transition-colors"
-        >
-          Quick Listing
-        </button>
-      </div>
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
-        <div className="flex items-center gap-2 whitespace-nowrap">
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setCreateError(null);
+              setShowQuickCreate(true);
+            }}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded transition-colors"
+          >
+            Quick Listing
+          </button>
           <label
             htmlFor="marketplace-sort"
             className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}
@@ -156,6 +187,31 @@ export default function Marketplace() {
             <option value="priceLowHigh">Pricing (Low to High)</option>
           </select>
         </div>
+
+        <div className="flex-1 lg:max-w-2xl">
+          <SearchBar value={search} onChange={(e) => setSearch(e.target.value)} listings={listings} />
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={() => setShowMine((prev) => !prev)}
+            disabled={status === "loading"}
+            className={`inline-flex items-center justify-center rounded px-4 py-2 font-semibold transition border ${
+              showMine
+                ? "bg-yellow-400 text-black border-yellow-500"
+                : "bg-transparent text-var-text border var-border hover:bg-var-surface"
+            } ${status === "loading" ? "opacity-60" : ""}`}
+          >
+            {showMine ? "Viewing My Listings" : "Show My Listings"}
+          </button>
+          <Link
+            href="/marketplace/new"
+            className="inline-flex items-center justify-center rounded px-4 py-2 text-black font-semibold bg-gradient-to-r from-[#F7C600] to-[#C97A00] hover:opacity-90 transition"
+          >
+            Create Listing
+          </Link>
+        </div>
       </div>
       <ListingsGrid 
         listings={sortedListings} 
@@ -163,6 +219,8 @@ export default function Marketplace() {
         error={error} 
         onCategoryClick={handleCategoryClick}
         onListingDeleted={handleListingDeleted}
+        showMine={showMine}
+        onDeleteListing={handleDeleteListing}
       />
 
       {showQuickCreate && (

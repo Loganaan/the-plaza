@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { auth } from '@/auth';
+import { findProfanity } from '@/lib/profanity';
 
 const prisma = new PrismaClient();
 
@@ -27,16 +29,22 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
+    const session = await auth();
+    const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
 
+    if (!userId || Number.isNaN(userId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
     const title = typeof body.title === 'string' ? body.title.trim() : '';
     const description = typeof body.description === 'string' ? body.description.trim() : null;
     const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : null;
     const parsedPrice = Number(body.price);
-    const categoryId = Number.isInteger(body.categoryId) ? body.categoryId : null;
-    const requestedSellerId = Number.isInteger(body.sellerId) ? body.sellerId : null;
+    const categoryFromName = typeof body.category === 'string' ? body.category.trim() : '';
+    const categoryFromId = Number.isInteger(body.categoryId) ? body.categoryId : null;
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -46,22 +54,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Price must be a valid non-negative number' }, { status: 400 });
     }
 
-    let sellerId = requestedSellerId;
+    const profanityHits = findProfanity(`${title} ${description ?? ''}`);
+    if (profanityHits.length > 0) {
+      return NextResponse.json({ error: 'Profanity is not allowed in listings' }, { status: 400 });
+    }
 
-    if (!sellerId) {
-      const fallbackSeller = await prisma.user.findFirst({
-        orderBy: { id: 'asc' },
-        select: { id: true },
+    let categoryId: number | null = categoryFromId;
+
+    if (categoryFromName) {
+      const existingCategory = await prisma.category.findFirst({
+        where: { field: categoryFromName },
       });
 
-      if (!fallbackSeller) {
-        return NextResponse.json(
-          { error: 'No users found. Create or seed a user before creating listings.' },
-          { status: 400 }
-        );
+      if (existingCategory) {
+        categoryId = existingCategory.id;
+      } else {
+        const createdCategory = await prisma.category.create({
+          data: { field: categoryFromName },
+        });
+        categoryId = createdCategory.id;
       }
-
-      sellerId = fallbackSeller.id;
     }
 
     const listing = await prisma.listing.create({
@@ -70,8 +82,8 @@ export async function POST(req: Request) {
         description: description || null,
         price: parsedPrice,
         imageUrl: imageUrl || null,
-        sellerId,
-        ...(categoryId ? { categoryId } : {}),
+        sellerId: userId,
+        categoryId,
       },
       include: {
         category: true,
