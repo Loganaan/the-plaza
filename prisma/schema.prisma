@@ -8,21 +8,33 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  name          String?
-  googleId      String         @unique
-  picture       String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                    Int            @id @default(autoincrement())
+  email                 String         @unique
+  name                  String?
+  googleId              String         @unique
+  picture               String?
   
-  listings            Listing[]
-  discussions         Discussion[]
-  replies             Reply[]
-  sentMessages        Message[]        @relation("SentMessages")
-  receivedMessages    Message[]        @relation("ReceivedMessages")
-  buyerConversations  Conversation[]   @relation("BuyerConversations")
-  sellerConversations Conversation[]   @relation("SellerConversations")
+  // Profile info
+  bio                   String?
+  location              String?
+  
+  // Privacy & preferences
+  canReceiveMessages    Boolean        @default(true)
+  listingVisibility     String         @default("public")  // 'public', 'private', 'contacts-only'
+  profileVisibility     String         @default("public")  // 'public', 'private'
+  notificationsEnabled  Boolean        @default(true)
+  emailNotifications    Boolean        @default(true)
+  
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  
+  listings              Listing[]
+  discussions           Discussion[]
+  replies               Reply[]
+  sentMessages          Message[]        @relation("SentMessages")
+  receivedMessages      Message[]        @relation("ReceivedMessages")
+  buyerConversations    Conversation[]   @relation("BuyerConversations")
+  sellerConversations   Conversation[]   @relation("SellerConversations")
 }
 
 model Category {
