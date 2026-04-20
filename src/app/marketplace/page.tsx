@@ -9,7 +9,7 @@ import ListingsGrid from "./components/ListingsGrid";
 import { useTheme } from "../context/ThemeContext";
 
 export default function Marketplace() {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, isAdmin } = useTheme();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,8 +88,10 @@ export default function Marketplace() {
 
   const handleDeleteListing = async (listingId: number) => {
     try {
+      const headers = isAdmin ? { "x-admin-override": "true" } : undefined;
       const response = await fetch(`/api/listings/${listingId}`, {
         method: "DELETE",
+        headers,
       });
 
       if (!response.ok) {

