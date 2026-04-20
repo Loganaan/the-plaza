@@ -1,31 +1,45 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { auth } from '@/auth';
 import { findProfanity } from '@/lib/profanity';
+import { prisma } from '@/lib/prisma';
+import { CreateListingSchema, PaginationSchema, createPaginatedResponse } from '@/lib/validations';
 
-const prisma = new PrismaClient();
-
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const listings = await prisma.listing.findMany({
-      include: {
-        category: true, // joins the category info
-      },
-      orderBy: {
-        dateListed: 'desc',
-      },
-    });
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    return new Response(JSON.stringify(listings), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    // Validate pagination params
+    const paginationResult = PaginationSchema.safeParse({ limit, offset });
+    if (!paginationResult.success) {
+      return NextResponse.json({ error: 'Invalid pagination parameters' }, { status: 400 });
+    }
+
+    const { limit: validLimit, offset: validOffset } = paginationResult.data;
+
+    const [listings, total] = await Promise.all([
+      prisma.listing.findMany({
+        include: {
+          category: true,
+          seller: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+        orderBy: { dateListed: 'desc' },
+        take: validLimit,
+        skip: validOffset,
+      }),
+      prisma.listing.count(),
+    ]);
+
+    return NextResponse.json(
+      createPaginatedResponse(listings, total, validLimit, validOffset),
+      { status: 200 }
+    );
   } catch (err) {
     console.error(err);
-    return new Response(JSON.stringify({ error: 'Failed to fetch listings' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 });
   }
 }
 
@@ -39,40 +53,38 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const title = typeof body.title === 'string' ? body.title.trim() : '';
-    const description = typeof body.description === 'string' ? body.description.trim() : null;
-    const imageUrl = typeof body.imageUrl === 'string' ? body.imageUrl.trim() : null;
-    const parsedPrice = Number(body.price);
-    const categoryFromName = typeof body.category === 'string' ? body.category.trim() : '';
-    const categoryFromId = Number.isInteger(body.categoryId) ? body.categoryId : null;
 
-    if (!title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    // Validate input
+    const validationResult = CreateListingSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { status: 400 }
+      );
     }
 
-    if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
-      return NextResponse.json({ error: 'Price must be a valid non-negative number' }, { status: 400 });
-    }
+    const { title, description, price, imageUrl, category, categoryId } = validationResult.data;
 
+    // Check for profanity
     const profanityHits = findProfanity(`${title} ${description ?? ''}`);
     if (profanityHits.length > 0) {
       return NextResponse.json({ error: 'Profanity is not allowed in listings' }, { status: 400 });
     }
 
-    let categoryId: number | null = categoryFromId;
+    let finalCategoryId: number | null = categoryId || null;
 
-    if (categoryFromName) {
+    if (category) {
       const existingCategory = await prisma.category.findFirst({
-        where: { field: categoryFromName },
+        where: { field: category },
       });
 
       if (existingCategory) {
-        categoryId = existingCategory.id;
+        finalCategoryId = existingCategory.id;
       } else {
         const createdCategory = await prisma.category.create({
-          data: { field: categoryFromName },
+          data: { field: category },
         });
-        categoryId = createdCategory.id;
+        finalCategoryId = createdCategory.id;
       }
     }
 
@@ -80,13 +92,16 @@ export async function POST(request: Request) {
       data: {
         title,
         description: description || null,
-        price: parsedPrice,
+        price,
         imageUrl: imageUrl || null,
         sellerId: userId,
-        categoryId,
+        categoryId: finalCategoryId,
       },
       include: {
         category: true,
+        seller: {
+          select: { id: true, name: true, email: true },
+        },
       },
     });
 

@@ -17,6 +17,8 @@ model User {
   updatedAt     DateTime       @updatedAt
   
   listings            Listing[]
+  discussions         Discussion[]
+  replies             Reply[]
   sentMessages        Message[]        @relation("SentMessages")
   receivedMessages    Message[]        @relation("ReceivedMessages")
   buyerConversations  Conversation[]   @relation("BuyerConversations")
@@ -43,6 +45,8 @@ model Listing {
   sellerId    Int
   
   conversations Conversation[]
+  
+  @@index([sellerId])
 }
 
 model Conversation {
@@ -90,18 +94,27 @@ model Discussion {
   id          Int                 @id @default(autoincrement())
   title       String
   description String
+  author      User?               @relation(fields: [userId], references: [id])
+  userId      Int?
   createdAt   DateTime            @default(now())
   category    DiscussionCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
   replies     Reply[]
+  
+  @@index([userId])
 }
 
 model Reply {
   id           Int      @id @default(autoincrement())
   content      String
+  author       User?    @relation(fields: [userId], references: [id])
+  userId       Int?
   discussionId Int
-  discussion   Discussion @relation(fields: [discussionId], references: [id])
+  discussion   Discussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
+  
+  @@index([userId])
+  @@index([discussionId])
 }
 
 

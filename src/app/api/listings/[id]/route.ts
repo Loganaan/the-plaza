@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { UpdateListingSchema } from '@/lib/validations';
+import { findProfanity } from '@/lib/profanity';
 
 export async function GET(
   request: NextRequest,
@@ -116,6 +118,87 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
+
+    if (!userId || Number.isNaN(userId)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const listingId = parseInt(id, 10);
+
+    if (isNaN(listingId)) {
+      return NextResponse.json({ error: 'Invalid listing ID' }, { status: 400 });
+    }
+
+    const existingListing = await prisma.listing.findUnique({
+      where: { id: listingId },
+      select: { sellerId: true },
+    });
+
+    if (!existingListing) {
+      return NextResponse.json({ error: 'Listing not found' }, { status: 404 });
+    }
+
+    if (existingListing.sellerId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const body = await request.json();
+
+    // Validate input
+    const validationResult = UpdateListingSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { title, description, price, imageUrl, status } = validationResult.data;
+
+    // Check for profanity if title or description is being updated
+    if (title || description) {
+      const profanityHits = findProfanity(`${title || ''} ${description || ''}`);
+      if (profanityHits.length > 0) {
+        return NextResponse.json({ error: 'Profanity is not allowed in listings' }, { status: 400 });
+      }
+    }
+
+    const updateData: Record<string, string | number | null | undefined> = {};
+    if (title) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = price;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (status) updateData.status = status;
+
+    const updatedListing = await prisma.listing.update({
+      where: { id: listingId },
+      data: updateData,
+      include: {
+        category: true,
+        seller: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+
+    return NextResponse.json(updatedListing);
+  } catch (error) {
+    console.error('Error updating listing:', error);
+    return NextResponse.json(
+      { error: 'Failed to update listing' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -149,64 +232,40 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const {
-      title,
-      description,
-      price,
-      imageUrl,
-      category,
-    } = body as {
-      title?: string;
-      description?: string;
-      price?: number | string;
-      imageUrl?: string;
-      category?: string;
-    };
 
-    if (!title || typeof title !== 'string') {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+    // Validate input
+    const validationResult = UpdateListingSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { status: 400 }
+      );
     }
 
-    const numericPrice = typeof price === 'string' ? Number(price) : price;
-    if (typeof numericPrice !== 'number' || !Number.isFinite(numericPrice)) {
-      return NextResponse.json({ error: 'Valid price is required' }, { status: 400 });
-    }
+    const { title, description, price, imageUrl, status } = validationResult.data;
 
-    const trimmedCategory = typeof category === 'string' ? category.trim() : '';
-    let categoryId: number | null = null;
-
-    if (trimmedCategory) {
-      const existingCategory = await prisma.category.findFirst({
-        where: { field: trimmedCategory },
-      });
-
-      if (existingCategory) {
-        categoryId = existingCategory.id;
-      } else {
-        const createdCategory = await prisma.category.create({
-          data: { field: trimmedCategory },
-        });
-        categoryId = createdCategory.id;
+    // Check for profanity if title or description is being updated
+    if (title || description) {
+      const profanityHits = findProfanity(`${title || ''} ${description || ''}`);
+      if (profanityHits.length > 0) {
+        return NextResponse.json({ error: 'Profanity is not allowed in listings' }, { status: 400 });
       }
     }
 
+    const updateData: Record<string, string | number | null | undefined> = {};
+    if (title) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (price !== undefined) updateData.price = price;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+    if (status) updateData.status = status;
+
     const updatedListing = await prisma.listing.update({
       where: { id: listingId },
-      data: {
-        title: title.trim(),
-        description: description?.trim() || null,
-        price: numericPrice,
-        imageUrl: imageUrl?.trim() || null,
-        categoryId,
-      },
+      data: updateData,
       include: {
         category: true,
         seller: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: { id: true, name: true, email: true },
         },
         conversations: {
           include: {
