@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ChatBox from "./components/ChatBox";
-import type { ListingDetail } from "@/app/marketplace/types";
+import type { Conversation, ListingDetail } from "@/app/marketplace/types";
 import { useTheme } from "@/app/context/ThemeContext";
 
 export default function ListingDetailPage() {
@@ -12,6 +12,8 @@ export default function ListingDetailPage() {
   const router = useRouter();
   const { isDarkMode } = useTheme();
   const [listing, setListing] = useState<ListingDetail | null>(null);
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+  const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAltText, setShowAltText] = useState(false);
@@ -25,6 +27,7 @@ export default function ListingDetailPage() {
         }
         const data = await response.json();
         setListing(data);
+        setActiveConversation(data.conversations?.[0] ?? null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -82,6 +85,35 @@ export default function ListingDetailPage() {
       </div>
     );
   }
+
+  const handleStartConversation = async () => {
+    if (isStartingConversation) return;
+
+    setIsStartingConversation(true);
+    try {
+      const response = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listingId: listing.id }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        const message = typeof payload?.error === 'string'
+          ? payload.error
+          : 'Failed to start conversation';
+        throw new Error(message);
+      }
+
+      const conversation = await response.json();
+      setActiveConversation(conversation);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to start conversation';
+      alert(message);
+    } finally {
+      setIsStartingConversation(false);
+    }
+  };
 
   return (
     <div className={`flex min-h-screen ${isDarkMode ? 'bg-[#121212] text-gray-200' : 'bg-gray-100 text-gray-900'}`}>
@@ -206,6 +238,19 @@ export default function ListingDetailPage() {
                       {listing.status}
                     </span>
                   </p>
+                  {!activeConversation && (
+                    <button
+                      onClick={handleStartConversation}
+                      className={`mt-4 w-full rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                        isDarkMode
+                          ? 'bg-blue-600 text-white hover:bg-blue-500'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      } ${isStartingConversation ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      disabled={isStartingConversation}
+                    >
+                      {isStartingConversation ? 'Starting conversation...' : 'Message Seller'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -213,9 +258,7 @@ export default function ListingDetailPage() {
         </div>
 
         {/* Chat Box */}
-        {listing.conversations.length > 0 && (
-          <ChatBox conversation={listing.conversations[0]} />
-        )}
+        {activeConversation && <ChatBox conversation={activeConversation} />}
       </main>
     </div>
   );
