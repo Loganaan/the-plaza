@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import type { Conversation, Message } from "@/app/marketplace/types";
 import { useTheme } from "@/app/context/ThemeContext";
 
@@ -10,11 +11,26 @@ interface ChatBoxProps {
 
 export default function ChatBox({ conversation }: ChatBoxProps) {
   const { isDarkMode } = useTheme();
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id ? parseInt(session.user.id, 10) : null;
+  const currentUser =
+    currentUserId && currentUserId === conversation.buyer.id
+      ? conversation.buyer
+      : currentUserId && currentUserId === conversation.seller.id
+        ? conversation.seller
+        : null;
+  const otherUser = currentUser?.id === conversation.buyer.id
+    ? conversation.seller
+    : conversation.buyer;
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>(conversation.messages);
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMessages(conversation.messages);
+  }, [conversation]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -35,8 +51,6 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
         },
         body: JSON.stringify({
           conversationId: conversation.id,
-          senderId: conversation.buyer.id, // Sending as buyer
-          receiverId: conversation.seller.id,
           content: newMessage.trim(),
         }),
       });
@@ -112,7 +126,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
               <div>
                 <h3 className={`font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>Conversation</h3>
                 <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {conversation.buyer.name} & {conversation.seller.name}
+                  {otherUser?.name || otherUser?.email || 'User'}
                 </p>
               </div>
               <button
@@ -143,15 +157,17 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
               </div>
             ) : (
               messages.map((message) => {
-                const isBuyer = message.sender.id === conversation.buyer.id;
+                const isCurrentUser = currentUserId
+                  ? message.sender.id === currentUserId
+                  : message.sender.id === conversation.buyer.id;
                 return (
                   <div
                     key={message.id}
-                    className={`flex ${isBuyer ? "justify-end" : "justify-start"}`}
+                    className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
                   >
                     <div
                       className={`max-w-[75%] rounded-lg p-3 ${
-                        isBuyer
+                        isCurrentUser
                           ? "bg-blue-600 text-white"
                           : isDarkMode ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-gray-900"
                       }`}
@@ -225,7 +241,7 @@ export default function ChatBox({ conversation }: ChatBoxProps) {
               </button>
             </div>
             <p className={`text-xs mt-2 text-center ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-              Chatting as {conversation.buyer.name || conversation.buyer.email}
+              Chatting as {currentUser?.name || currentUser?.email || 'You'}
             </p>
           </div>
         </div>
