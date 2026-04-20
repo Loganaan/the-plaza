@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { auth } from '@/auth';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
+
     const { id } = await params;
     const listingId = parseInt(id);
     
@@ -30,12 +31,63 @@ export async function GET(
             email: true,
           },
         },
-        conversations: {
-          include: {
-            messages: {
-              orderBy: { createdAt: 'asc' },
+        conversations: userId && !Number.isNaN(userId)
+          ? {
+              where: {
+                OR: [{ buyerId: userId }, { sellerId: userId }],
+              },
               include: {
-                sender: {
+                messages: {
+                  orderBy: { createdAt: 'asc' },
+                  include: {
+                    sender: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                      },
+                    },
+                  },
+                },
+                buyer: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+                seller: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            }
+          : {
+              where: { id: -1 },
+              include: {
+                messages: {
+                  orderBy: { createdAt: 'asc' },
+                  include: {
+                    sender: {
+                      select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                      },
+                    },
+                  },
+                },
+                buyer: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+                seller: {
                   select: {
                     id: true,
                     name: true,
@@ -44,22 +96,6 @@ export async function GET(
                 },
               },
             },
-            buyer: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-            seller: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-              },
-            },
-          },
-        },
       },
     });
 
