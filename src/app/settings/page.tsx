@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '@/app/context/ThemeContext';
 import ProfileTab from './components/ProfileTab';
 import AccountTab from './components/AccountTab';
@@ -31,7 +32,8 @@ interface Stats {
 
 export default function SettingsPage() {
   const { isDarkMode } = useTheme();
-  const { status } = useSession();
+  const { status, data: session } = useSession();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,42 +41,43 @@ export default function SettingsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
+    // If loading, don't do anything yet
     if (status === 'loading') {
       return;
     }
 
+    // If not authenticated, redirect to login
     if (status === 'unauthenticated') {
-      setError('Please log in to access settings');
-      setLoading(false);
+      router.push('/login');
       return;
     }
 
-    const fetchSettings = async () => {
-      try {
-        const response = await fetch('/api/settings');
-        if (!response.ok) {
-          if (response.status === 401) {
-            setError('Please log in to access settings');
-            setLoading(false);
-            return;
+    // If authenticated, fetch settings
+    if (status === 'authenticated' && session?.user) {
+      const fetchSettings = async () => {
+        try {
+          const response = await fetch('/api/settings');
+          if (!response.ok) {
+            if (response.status === 401) {
+              router.push('/login');
+              return;
+            }
+            throw new Error('Failed to fetch settings');
           }
-          throw new Error('Failed to fetch settings');
+          const data = await response.json();
+          setUserData(data.user);
+          setStats(data.stats);
+          setError(null);
+          setLoading(false);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'An error occurred');
+          setLoading(false);
         }
-        const data = await response.json();
-        setUserData(data.user);
-        setStats(data.stats);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    if (status === 'authenticated') {
       fetchSettings();
     }
-  }, [status]);
+  }, [status, session, router]);
 
   const tabs = [
     { id: 'profile', label: 'Profile' },
