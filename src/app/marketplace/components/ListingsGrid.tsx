@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import type { Listing } from "@/app/marketplace/types.ts";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -12,6 +11,7 @@ interface ListingsGridProps {
   loading: boolean;
   error: string | null;
   onCategoryClick?: (category: string) => void;
+  onListingDeleted?: (listingId: number) => void;
   showMine?: boolean;
   onDeleteListing?: (listingId: number) => void;
 }
@@ -21,11 +21,11 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
   loading,
   error,
   onCategoryClick,
+  onListingDeleted,
   showMine = false,
   onDeleteListing,
 }) => {
-  const router = useRouter();
-  const { isDarkMode } = useTheme();
+  const { isDarkMode, isAdmin } = useTheme();
 
   if (loading) {
     return (
@@ -78,6 +78,39 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
         const ListingCard = () => {
           const [isHovered, setIsHovered] = useState(false);
           const [showAltText, setShowAltText] = useState(false);
+          const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+          const [isDeleting, setIsDeleting] = useState(false);
+          const [deleteError, setDeleteError] = useState<string | null>(null);
+          const categoryField = listing.category?.field?.trim();
+
+          const handleDeleteListing = async (e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+
+            if (isDeleting) {
+              return;
+            }
+
+            setIsDeleting(true);
+            setDeleteError(null);
+
+            try {
+              const response = await fetch(`/api/listings/${listing.id}`, {
+                method: "DELETE",
+              });
+
+              if (!response.ok) {
+                const data = await response.json().catch(() => null);
+                throw new Error(data?.error || "Failed to delete listing");
+              }
+
+              onListingDeleted?.(listing.id);
+              setShowDeleteConfirm(false);
+            } catch (err) {
+              setDeleteError(err instanceof Error ? err.message : "Failed to delete listing");
+            } finally {
+              setIsDeleting(false);
+            }
+          };
           
           return (
             <div
@@ -98,34 +131,40 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
                   style={{ opacity: isHovered ? 0.5 : 0 }}
                 />
               )}
-          <div 
-            onClick={() => router.push(`/marketplace/${listing.id}`)}
-            className={`h-40 rounded-lg flex items-center justify-center overflow-hidden relative cursor-pointer ${
+          <div
+            className={`h-40 rounded-lg overflow-hidden relative ${
               isDarkMode ? "bg-gray-800 text-gray-600" : "bg-gray-200 text-gray-400"
-            }`}>
-            {listing.imageUrl ? (
-              <Image
-                src={listing.imageUrl}
-                alt={listing.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            }`}
+          >
+            <Link
+              href={`/marketplace/${listing.id}`}
+              aria-label={`View listing: ${listing.title}`}
+              className="absolute inset-0 z-0 flex items-center justify-center rounded-lg border-2 border-transparent focus:outline-none focus-visible:border-cyan-400"
+            >
+              {listing.imageUrl ? (
+                <Image
+                  src={listing.imageUrl}
+                  alt={listing.title}
+                  fill
+                  className="object-cover"
                 />
-              </svg>
-            )}
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-10 w-10"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              )}
+            </Link>
             {/* Alt button */}
             {isHovered && (
               <button
@@ -195,15 +234,15 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
                     </button>
                   </div>
                 )}
-                <p 
-                  onClick={() => router.push(`/marketplace/${listing.id}`)}
-                  className={`text-sm font-semibold truncate transition-colors cursor-pointer hover:underline ${
+                <Link
+                  href={`/marketplace/${listing.id}`}
+                  className={`text-sm font-semibold truncate transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${
                     isDarkMode ? (isHovered ? "text-white" : "text-gray-200") : "text-gray-900"
-                  }`} 
+                  }`}
                   title={listing.title}
                 >
                   {listing.title}
-                </p>
+                </Link>
                 <p className={`text-sm font-bold transition-colors ${
                   isDarkMode ? (isHovered ? "text-green-300" : "text-green-400") : "text-green-600"
                 }`}>
@@ -214,27 +253,92 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
                 }`}>
                   {listing.description || "No description available"}
                 </p>
-                {listing.category && (
-                  <p 
+                {categoryField && (
+                  <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (listing.category) {
-                        onCategoryClick?.(listing.category.field);
-                      }
+                      onCategoryClick?.(categoryField);
                     }}
-                    className={`text-xs mt-1 transition-colors cursor-pointer hover:underline ${
+                    className={`text-xs mt-1 transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500 rounded ${
                       isDarkMode ? (isHovered ? "text-yellow-200" : "text-yellow-400") : "text-yellow-600 hover:text-yellow-800"
                     }`}
                   >
-                    {listing.category.field}
-                  </p>
+                    {categoryField}
+                  </button>
                 )}
                 <p className={`text-xs mt-1 transition-colors ${
                   isDarkMode ? (isHovered ? "text-gray-300" : "text-gray-500") : "text-gray-500"
                 }`}>
                   Listed: {new Date(listing.dateListed).toLocaleDateString()}
                 </p>
+                {isAdmin && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="mt-2 w-full py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded transition-colors"
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
+              
+              {/* Delete Confirmation Modal */}
+              {showDeleteConfirm && (
+                <div 
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteConfirm(false);
+                  }}
+                >
+                  <div 
+                    className={`rounded-lg p-6 max-w-md w-full mx-4 shadow-xl ${
+                      isDarkMode ? "bg-[#2c2c2c]" : "bg-white"
+                    }`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <h3 className={`text-lg font-semibold mb-4 ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}>
+                      Confirm Deletion
+                    </h3>
+                    <p className={`mb-6 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-700"
+                    }`}>
+                      Are you sure you wish to delete this listing?
+                    </p>
+                    {deleteError && (
+                      <p className="mb-4 text-sm text-red-500">{deleteError}</p>
+                    )}
+                    <div className="flex gap-3 justify-end">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowDeleteConfirm(false);
+                        }}
+                        disabled={isDeleting}
+                        className={`px-4 py-2 rounded font-semibold transition-colors ${
+                          isDarkMode 
+                            ? "bg-gray-700 hover:bg-gray-600 text-white" 
+                            : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+                        }`}
+                      >
+                        No
+                      </button>
+                      <button
+                        onClick={handleDeleteListing}
+                        disabled={isDeleting}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition-colors"
+                      >
+                        {isDeleting ? "Deleting..." : "Yes"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         };
