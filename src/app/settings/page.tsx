@@ -39,6 +39,10 @@ export default function SettingsPage() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
+    if (status === 'loading') {
+      return;
+    }
+
     if (status === 'unauthenticated') {
       setError('Please log in to access settings');
       setLoading(false);
@@ -47,14 +51,19 @@ export default function SettingsPage() {
 
     const fetchSettings = async () => {
       try {
-        setLoading(true);
         const response = await fetch('/api/settings');
         if (!response.ok) {
+          if (response.status === 401) {
+            setError('Please log in to access settings');
+            setLoading(false);
+            return;
+          }
           throw new Error('Failed to fetch settings');
         }
         const data = await response.json();
         setUserData(data.user);
         setStats(data.stats);
+        setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
