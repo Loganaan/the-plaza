@@ -27,7 +27,7 @@ export default function AccountTab({ userData }: AccountTabProps) {
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Email Address
         </h3>
-        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-gray-100'}`}>
           <p className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{userData?.email}</p>
           <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             Your primary email address. Contact support to change it.
@@ -39,7 +39,7 @@ export default function AccountTab({ userData }: AccountTabProps) {
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Account Created
         </h3>
-        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-gray-100'}`}>
           <p className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>
             {formatDate(userData?.createdAt)}
           </p>
@@ -53,7 +53,7 @@ export default function AccountTab({ userData }: AccountTabProps) {
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Connected Accounts
         </h3>
-        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+        <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-gray-100'}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Google</p>
