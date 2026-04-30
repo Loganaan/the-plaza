@@ -68,11 +68,16 @@ export const validatePagination = (data: any): { success: boolean; data?: Pagina
 
 export const validateCreateListing = (data: any): { success: boolean; data?: CreateListingInput; error?: any } => {
   const errors: any = {};
+  const parsedPrice = typeof data.price === 'string' && data.price.trim() !== ''
+    ? Number.parseFloat(data.price)
+    : data.price;
   
   if (!data.title || typeof data.title !== 'string' || data.title.length === 0 || data.title.length > 200) {
     errors.title = 'Title is required and must be between 1-200 characters';
   }
-  if (data.price !== undefined && (typeof data.price !== 'number' || data.price < 0)) {
+  if (parsedPrice === undefined || data.price === '' || data.price === null) {
+    errors.price = 'Price is required';
+  } else if (typeof parsedPrice !== 'number' || Number.isNaN(parsedPrice) || parsedPrice < 0) {
     errors.price = 'Price must be non-negative';
   }
   if (data.imageUrl && typeof data.imageUrl === 'string' && !isValidUrl(data.imageUrl)) {
@@ -83,16 +88,19 @@ export const validateCreateListing = (data: any): { success: boolean; data?: Cre
     return { success: false, error: errors };
   }
   
-  return { success: true, data };
+  return { success: true, data: { ...data, price: parsedPrice } };
 };
 
 export const validateUpdateListing = (data: any): { success: boolean; data?: UpdateListingInput; error?: any } => {
   const errors: any = {};
+  const parsedPrice = typeof data.price === 'string' && data.price.trim() !== ''
+    ? Number.parseFloat(data.price)
+    : data.price;
   
   if (data.title !== undefined && (typeof data.title !== 'string' || data.title.length === 0 || data.title.length > 200)) {
     errors.title = 'Title must be between 1-200 characters';
   }
-  if (data.price !== undefined && (typeof data.price !== 'number' || data.price < 0)) {
+  if (parsedPrice !== undefined && (typeof parsedPrice !== 'number' || Number.isNaN(parsedPrice) || parsedPrice < 0)) {
     errors.price = 'Price must be non-negative';
   }
   if (data.imageUrl && typeof data.imageUrl === 'string' && !isValidUrl(data.imageUrl)) {
@@ -106,7 +114,7 @@ export const validateUpdateListing = (data: any): { success: boolean; data?: Upd
     return { success: false, error: errors };
   }
   
-  return { success: true, data };
+  return { success: true, data: { ...data, price: parsedPrice } };
 };
 
 export const validateCreateDiscussion = (data: any): { success: boolean; data?: CreateDiscussionInput; error?: any } => {
