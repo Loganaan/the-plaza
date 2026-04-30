@@ -35,6 +35,7 @@ model User {
   receivedMessages      Message[]        @relation("ReceivedMessages")
   buyerConversations    Conversation[]   @relation("BuyerConversations")
   sellerConversations   Conversation[]   @relation("SellerConversations")
+  listingReports         ListingReport[]
 }
 
 model Category {
@@ -57,6 +58,7 @@ model Listing {
   sellerId    Int
   
   conversations Conversation[]
+  reports       ListingReport[]
   
   @@index([sellerId])
 }
@@ -129,9 +131,32 @@ model Reply {
   @@index([discussionId])
 }
 
+model ListingReport {
+  id         Int          @id @default(autoincrement())
+  listing    Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId  Int
+  reporter   User         @relation(fields: [reporterId], references: [id])
+  reporterId Int
+  reason     String
+  message    String?
+  status     ReportStatus @default(open)
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  @@index([listingId])
+  @@index([reporterId])
+  @@index([status])
+}
+
 
 enum ListingStatus {
   active
   sold
   deleted
+}
+
+enum ReportStatus {
+  open
+  resolved
+  dismissed
 }
