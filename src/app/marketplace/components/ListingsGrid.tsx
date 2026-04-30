@@ -26,6 +26,13 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
   onDeleteListing,
 }) => {
   const { isDarkMode, isAdmin } = useTheme();
+  const reportReasons = [
+    { value: 'scam', label: 'Scam or misleading' },
+    { value: 'prohibited', label: 'Prohibited item' },
+    { value: 'harassment', label: 'Harassment or abuse' },
+    { value: 'spam', label: 'Spam or duplicate' },
+    { value: 'other', label: 'Other' },
+  ];
 
   if (loading) {
     return (
@@ -81,6 +88,12 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
           const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
           const [isDeleting, setIsDeleting] = useState(false);
           const [deleteError, setDeleteError] = useState<string | null>(null);
+          const [showReportModal, setShowReportModal] = useState(false);
+          const [reportReason, setReportReason] = useState('scam');
+          const [reportMessage, setReportMessage] = useState('');
+          const [reportError, setReportError] = useState<string | null>(null);
+          const [isReporting, setIsReporting] = useState(false);
+          const [reportSuccess, setReportSuccess] = useState(false);
           const categoryField = listing.category?.field?.trim();
 
           const handleDeleteListing = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -111,6 +124,39 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
               setDeleteError(err instanceof Error ? err.message : "Failed to delete listing");
             } finally {
               setIsDeleting(false);
+            }
+          };
+
+          const handleReportListing = async () => {
+            if (isReporting) {
+              return;
+            }
+
+            setIsReporting(true);
+            setReportError(null);
+
+            try {
+              const response = await fetch('/api/reports', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  listingId: listing.id,
+                  reason: reportReason,
+                  message: reportMessage.trim() || undefined,
+                }),
+              });
+
+              if (!response.ok) {
+                const payload = await response.json().catch(() => ({}));
+                throw new Error(payload?.error || 'Failed to submit report');
+              }
+
+              setReportSuccess(true);
+              setReportMessage('');
+            } catch (err) {
+              setReportError(err instanceof Error ? err.message : 'Failed to submit report');
+            } finally {
+              setIsReporting(false);
             }
           };
           
@@ -274,6 +320,38 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
                 }`}>
                   Listed: {new Date(listing.dateListed).toLocaleDateString()}
                 </p>
+                <div className="mt-2 flex items-center justify-end">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReportSuccess(false);
+                      setReportError(null);
+                      setShowReportModal(true);
+                    }}
+                    className={`inline-flex items-center justify-center h-8 w-8 rounded-full border transition-colors ${
+                      isDarkMode
+                        ? "border-yellow-500/70 text-yellow-200 hover:bg-yellow-500/10"
+                        : "border-yellow-500 text-yellow-700 hover:bg-yellow-50"
+                    }`}
+                    aria-label="Report listing"
+                    title="Report listing"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M6 4v16" />
+                      <path d="M6 4h10l-2 3 2 3H6" />
+                    </svg>
+                  </button>
+                </div>
                 {isAdmin && (
                   <button
                     onClick={(e) => {
@@ -336,6 +414,100 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
                         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold transition-colors"
                       >
                         {isDeleting ? "Deleting..." : "Yes"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showReportModal && (
+                <div
+                  className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowReportModal(false);
+                  }}
+                >
+                  <div
+                    className={`rounded-lg p-6 max-w-md w-full mx-4 shadow-xl ${
+                      isDarkMode ? "bg-[#2c2c2c]" : "bg-white"
+                    }`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <h3 className={`text-lg font-semibold mb-2 ${
+                      isDarkMode ? "text-white" : "text-gray-900"
+                    }`}>
+                      Report Listing
+                    </h3>
+                    <p className={`text-sm mb-4 ${
+                      isDarkMode ? "text-gray-300" : "text-gray-600"
+                    }`}>
+                      Tell us what is wrong with this listing.
+                    </p>
+                    <label className={`text-xs font-semibold uppercase tracking-wide ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}>
+                      Reason
+                    </label>
+                    <select
+                      value={reportReason}
+                      onChange={(e) => setReportReason(e.target.value)}
+                      className={`mt-2 w-full rounded-md px-3 py-2 text-sm border outline-none ${
+                        isDarkMode
+                          ? "bg-[#1f1f1f] border-gray-700 text-gray-200"
+                          : "bg-white border-gray-300 text-gray-900"
+                      }`}
+                    >
+                      {reportReasons.map((reason) => (
+                        <option key={reason.value} value={reason.value}>
+                          {reason.label}
+                        </option>
+                      ))}
+                    </select>
+                    <label className={`mt-4 block text-xs font-semibold uppercase tracking-wide ${
+                      isDarkMode ? "text-gray-400" : "text-gray-500"
+                    }`}>
+                      Details (optional)
+                    </label>
+                    <textarea
+                      value={reportMessage}
+                      onChange={(e) => setReportMessage(e.target.value)}
+                      rows={3}
+                      className={`mt-2 w-full rounded-md px-3 py-2 text-sm border outline-none ${
+                        isDarkMode
+                          ? "bg-[#1f1f1f] border-gray-700 text-gray-200"
+                          : "bg-white border-gray-300 text-gray-900"
+                      }`}
+                      placeholder="Share any context that helps us review."
+                    />
+                    {reportError && (
+                      <p className="mt-3 text-sm text-red-500">{reportError}</p>
+                    )}
+                    {reportSuccess && (
+                      <p className="mt-3 text-sm text-green-500">Report submitted. Thank you.</p>
+                    )}
+                    <div className="mt-4 flex gap-3 justify-end">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowReportModal(false);
+                        }}
+                        className={`px-4 py-2 rounded font-semibold transition-colors ${
+                          isDarkMode
+                            ? "bg-gray-700 hover:bg-gray-600 text-white"
+                            : "bg-gray-200 hover:bg-gray-300 text-gray-900"
+                        }`}
+                      >
+                        Close
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleReportListing}
+                        disabled={isReporting}
+                        className="px-4 py-2 rounded font-semibold bg-yellow-500 text-black hover:bg-yellow-400 transition-colors disabled:opacity-60"
+                      >
+                        {isReporting ? 'Submitting...' : 'Submit Report'}
                       </button>
                     </div>
                   </div>
