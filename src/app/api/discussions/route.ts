@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { findProfanity } from '@/lib/profanity';
 import { prisma } from '@/lib/prisma';
-import { CreateDiscussionSchema, PaginationSchema, createPaginatedResponse } from '@/lib/validations';
+import { validateCreateDiscussion, validatePagination, createPaginatedResponse } from '@/lib/validations';
 
 // GET all discussions with pagination
 export async function GET(request: Request) {
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Validate pagination params
-    const paginationResult = PaginationSchema.safeParse({ limit, offset });
+    const paginationResult = validatePagination({ limit, offset });
     if (!paginationResult.success) {
       return NextResponse.json({ error: 'Invalid pagination parameters' }, { status: 400 });
     }
@@ -57,10 +57,10 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Validate input
-    const validationResult = CreateDiscussionSchema.safeParse(body);
+    const validationResult = validateCreateDiscussion(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: validationResult.error },
         { status: 400 }
       );
     }

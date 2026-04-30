@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
 
 // Get user settings and stats
 export async function GET() {
@@ -57,17 +56,6 @@ export async function GET() {
 }
 
 // Update user settings
-const UpdateSettingsSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  bio: z.string().max(500).optional(),
-  location: z.string().max(100).optional(),
-  canReceiveMessages: z.boolean().optional(),
-  listingVisibility: z.enum(['public', 'private', 'contacts-only']).optional(),
-  profileVisibility: z.enum(['public', 'private']).optional(),
-  notificationsEnabled: z.boolean().optional(),
-  emailNotifications: z.boolean().optional(),
-});
-
 export async function PUT(request: NextRequest) {
   try {
     const session = await auth();
@@ -80,15 +68,41 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
 
     // Validate input
-    const validationResult = UpdateSettingsSchema.safeParse(body);
-    if (!validationResult.success) {
+    const errors: any = {};
+    
+    if (body.name !== undefined && (typeof body.name !== 'string' || body.name.length === 0 || body.name.length > 100)) {
+      errors.name = 'Name must be between 1-100 characters';
+    }
+    if (body.bio !== undefined && (typeof body.bio !== 'string' || body.bio.length > 500)) {
+      errors.bio = 'Bio must be at most 500 characters';
+    }
+    if (body.location !== undefined && (typeof body.location !== 'string' || body.location.length > 100)) {
+      errors.location = 'Location must be at most 100 characters';
+    }
+    if (body.canReceiveMessages !== undefined && typeof body.canReceiveMessages !== 'boolean') {
+      errors.canReceiveMessages = 'Must be a boolean';
+    }
+    if (body.listingVisibility !== undefined && !['public', 'private', 'contacts-only'].includes(body.listingVisibility)) {
+      errors.listingVisibility = 'Invalid listing visibility';
+    }
+    if (body.profileVisibility !== undefined && !['public', 'private'].includes(body.profileVisibility)) {
+      errors.profileVisibility = 'Invalid profile visibility';
+    }
+    if (body.notificationsEnabled !== undefined && typeof body.notificationsEnabled !== 'boolean') {
+      errors.notificationsEnabled = 'Must be a boolean';
+    }
+    if (body.emailNotifications !== undefined && typeof body.emailNotifications !== 'boolean') {
+      errors.emailNotifications = 'Must be a boolean';
+    }
+
+    if (Object.keys(errors).length > 0) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: errors },
         { status: 400 }
       );
     }
 
-    const updateData = validationResult.data;
+    const updateData = body;
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },

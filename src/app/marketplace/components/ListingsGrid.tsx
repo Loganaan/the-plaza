@@ -94,8 +94,10 @@ const ListingsGrid: React.FC<ListingsGridProps> = ({
             setDeleteError(null);
 
             try {
+              const headers = isAdmin ? { "x-admin-override": "true" } : undefined;
               const response = await fetch(`/api/listings/${listing.id}`, {
                 method: "DELETE",
+                headers,
               });
 
               if (!response.ok) {
