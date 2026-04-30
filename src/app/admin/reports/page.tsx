@@ -79,6 +79,60 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleDeleteListingReport = async (reportId: number) => {
+    const shouldDelete = window.confirm("Delete this report? This cannot be undone.");
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/reports", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-override": "true",
+        },
+        body: JSON.stringify({ reportId }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.error || "Failed to delete report");
+      }
+
+      setReports((prev) => prev.filter((report) => report.id !== reportId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete report");
+    }
+  };
+
+  const handleDeleteDiscussionReport = async (reportId: number) => {
+    const shouldDelete = window.confirm("Delete this report? This cannot be undone.");
+    if (!shouldDelete) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/discussion-reports", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-override": "true",
+        },
+        body: JSON.stringify({ reportId }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.error || "Failed to delete report");
+      }
+
+      setDiscussionReports((prev) => prev.filter((report) => report.id !== reportId));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete report");
+    }
+  };
+
   useEffect(() => {
     if (status === "loading") {
       return;
@@ -233,17 +287,30 @@ export default function ReportsPage() {
                         Reported {new Date(report.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
-                        statusPillStyles[report.status]
-                      }`}
-                    >
+                    <div className="flex items-center gap-3">
                       <span
-                        className={`h-2 w-2 rounded-full ${statusDotStyles[report.status]}`}
-                        aria-hidden="true"
-                      />
-                      {statusLabels[report.status]}
-                    </span>
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
+                          statusPillStyles[report.status]
+                        }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${statusDotStyles[report.status]}`}
+                          aria-hidden="true"
+                        />
+                        {statusLabels[report.status]}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteListingReport(report.id)}
+                        className={`text-xs font-semibold rounded-full border px-3 py-1 transition-colors ${
+                          isDarkMode
+                            ? "border-red-500/60 text-red-300 hover:bg-red-500/10"
+                            : "border-red-500 text-red-600 hover:bg-red-50"
+                        }`}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
 
                   {report.message && (
@@ -344,17 +411,30 @@ export default function ReportsPage() {
                         Reported {new Date(report.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    <span
-                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
-                        statusPillStyles[report.status]
-                      }`}
-                    >
+                    <div className="flex items-center gap-3">
                       <span
-                        className={`h-2 w-2 rounded-full ${statusDotStyles[report.status]}`}
-                        aria-hidden="true"
-                      />
-                      {statusLabels[report.status]}
-                    </span>
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
+                          statusPillStyles[report.status]
+                        }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${statusDotStyles[report.status]}`}
+                          aria-hidden="true"
+                        />
+                        {statusLabels[report.status]}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteDiscussionReport(report.id)}
+                        className={`text-xs font-semibold rounded-full border px-3 py-1 transition-colors ${
+                          isDarkMode
+                            ? "border-red-500/60 text-red-300 hover:bg-red-500/10"
+                            : "border-red-500 text-red-600 hover:bg-red-50"
+                        }`}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
 
                   {report.message && (

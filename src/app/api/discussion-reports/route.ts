@@ -98,3 +98,48 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to create report" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth();
+    const userId = session?.user?.id ? parseInt(session.user.id, 10) : null;
+    const isAdmin = request.headers.get("x-admin-override") === "true";
+
+    if (!userId || Number.isNaN(userId)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+
+    const reportId = typeof body.reportId === "number"
+      ? body.reportId
+      : Number.parseInt(body.reportId, 10);
+
+    if (!reportId || Number.isNaN(reportId)) {
+      return NextResponse.json({ error: "Invalid report ID" }, { status: 400 });
+    }
+
+    const existing = await prisma.discussionReport.findUnique({
+      where: { id: reportId },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Report not found" }, { status: 404 });
+    }
+
+    await prisma.discussionReport.delete({ where: { id: reportId } });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Error deleting discussion report:", error);
+    return NextResponse.json({ error: "Failed to delete report" }, { status: 500 });
+  }
+}
