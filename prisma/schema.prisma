@@ -36,6 +36,7 @@ model User {
   buyerConversations    Conversation[]   @relation("BuyerConversations")
   sellerConversations   Conversation[]   @relation("SellerConversations")
   listingReports         ListingReport[]
+  discussionReports      DiscussionReport[]
 }
 
 model Category {
@@ -114,6 +115,7 @@ model Discussion {
   category    DiscussionCategory? @relation(fields: [categoryId], references: [id])
   categoryId  Int?
   replies     Reply[]
+  reports     DiscussionReport[]
   
   @@index([userId])
 }
@@ -144,6 +146,23 @@ model ListingReport {
   resolvedAt DateTime?
 
   @@index([listingId])
+  @@index([reporterId])
+  @@index([status])
+}
+
+model DiscussionReport {
+  id           Int          @id @default(autoincrement())
+  discussion   Discussion   @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  discussionId Int
+  reporter     User         @relation(fields: [reporterId], references: [id])
+  reporterId   Int
+  reason       String
+  message      String?
+  status       ReportStatus @default(open)
+  createdAt    DateTime     @default(now())
+  resolvedAt   DateTime?
+
+  @@index([discussionId])
   @@index([reporterId])
   @@index([status])
 }
