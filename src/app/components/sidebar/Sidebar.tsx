@@ -5,17 +5,17 @@ import { useTheme } from "../../context/ThemeContext";
 import { useSession, signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 
-const navItems = [
-  { label: "Dashboard", href: "/" },
-  { label: "Marketplace", href: "/marketplace" },
-  { label: "Discussion Board", href: "/discussions" },
-  { label: "Settings", href: "/settings" },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
   const { isDarkMode, toggleDarkMode, isAdmin, toggleAdmin } = useTheme();
   const { data: session } = useSession();
+  const navItems = [
+    { label: "Dashboard", href: "/" },
+    { label: "Marketplace", href: "/marketplace" },
+    { label: "Discussion Board", href: "/discussions" },
+    { label: "Settings", href: "/settings" },
+    ...(isAdmin ? [{ label: "Reports", href: "/admin/reports" }] : []),
+  ];
   // Initialize from localStorage to prevent flash
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
