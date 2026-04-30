@@ -31,6 +31,30 @@ const reasonLabels: Record<string, string> = {
   other: "Other",
 };
 
+const statusLabels: Record<ReportItem["status"], string> = {
+  open: "Open",
+  resolved: "Resolved",
+  dismissed: "Dismissed",
+};
+
+const statusPillStyles: Record<ReportItem["status"], string> = {
+  open: "text-gray-300 border-gray-800",
+  resolved: "text-gray-300 border-gray-800",
+  dismissed: "text-gray-300 border-gray-800",
+};
+
+const statusDotStyles: Record<ReportItem["status"], string> = {
+  open: "bg-yellow-400",
+  resolved: "bg-emerald-400",
+  dismissed: "bg-gray-400",
+};
+
+const statusRailStyles: Record<ReportItem["status"], string> = {
+  open: "bg-yellow-400",
+  resolved: "bg-emerald-400",
+  dismissed: "bg-gray-400",
+};
+
 export default function ReportsPage() {
   const { isDarkMode, isAdmin } = useTheme();
   const { status } = useSession();
@@ -118,11 +142,8 @@ export default function ReportsPage() {
               Review reports submitted by marketplace users.
             </p>
           </div>
-          <div
-            className={`rounded-full px-4 py-1 text-sm font-semibold ${
-              isDarkMode ? "bg-gray-800 text-yellow-200" : "bg-white text-yellow-700"
-            }`}
-          >
+          <div className={`text-sm font-semibold ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}>
+            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-yellow-500" aria-hidden="true" />
             {reportCount} total
           </div>
         </div>
@@ -151,12 +172,19 @@ export default function ReportsPage() {
             return (
               <div
                 key={report.id}
-                className={`rounded-lg border p-5 shadow-sm ${
+                className={`relative overflow-hidden rounded-2xl border p-6 shadow-sm ${
                   isDarkMode ? "bg-[#1c1c1c] border-gray-800" : "bg-white border-gray-200"
                 }`}
               >
-                <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                  <div>
+                <div
+                  className={`absolute left-0 top-0 h-full w-1 ${statusRailStyles[report.status]}`}
+                  aria-hidden="true"
+                />
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="space-y-1">
+                    <p className={`text-xs uppercase tracking-wide ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
+                      Report #{report.id}
+                    </p>
                     <h2 className={`text-lg font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                       {reasonLabel}
                     </h2>
@@ -165,30 +193,34 @@ export default function ReportsPage() {
                     </p>
                   </div>
                   <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase ${
-                      report.status === "open"
-                        ? "bg-yellow-400/20 text-yellow-500"
-                        : report.status === "resolved"
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-gray-500/20 text-gray-400"
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${
+                      statusPillStyles[report.status]
                     }`}
                   >
-                    {report.status}
+                    <span
+                      className={`h-2 w-2 rounded-full ${statusDotStyles[report.status]}`}
+                      aria-hidden="true"
+                    />
+                    {statusLabels[report.status]}
                   </span>
                 </div>
 
                 {report.message && (
-                  <div className={`mt-3 rounded-md p-3 text-sm ${
-                    isDarkMode ? "bg-[#181818] text-gray-300" : "bg-gray-50 text-gray-700"
-                  }`}>
+                  <div
+                    className={`mt-4 rounded-xl border p-4 text-sm ${
+                      isDarkMode
+                        ? "bg-[#181818] border-gray-800 text-gray-300"
+                        : "bg-gray-50 border-gray-200 text-gray-700"
+                    }`}
+                  >
                     {report.message}
                   </div>
                 )}
 
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <div
-                    className={`rounded-md p-3 ${
-                      isDarkMode ? "bg-[#181818]" : "bg-gray-50"
+                    className={`rounded-xl border p-4 ${
+                      isDarkMode ? "bg-[#181818] border-gray-800" : "bg-gray-50 border-gray-200"
                     }`}
                   >
                     <p className={`text-xs font-semibold uppercase ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
@@ -212,8 +244,8 @@ export default function ReportsPage() {
                   </div>
 
                   <div
-                    className={`rounded-md p-3 ${
-                      isDarkMode ? "bg-[#181818]" : "bg-gray-50"
+                    className={`rounded-xl border p-4 ${
+                      isDarkMode ? "bg-[#181818] border-gray-800" : "bg-gray-50 border-gray-200"
                     }`}
                   >
                     <p className={`text-xs font-semibold uppercase ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
