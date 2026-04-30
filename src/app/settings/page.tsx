@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center">Loading settings...</div>
         </div>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
 
   if (error) {
     return (
-      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="text-red-500">{error}</div>
         </div>
@@ -108,7 +108,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
       <div className="max-w-4xl mx-auto">
         <h1 className={`text-3xl font-bold mb-8 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Settings
@@ -136,7 +136,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Content */}
-        <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+        <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-white'} shadow-sm`}>
           {activeTab === 'profile' && userData && <ProfileTab userData={userData} />}
           {activeTab === 'account' && userData && <AccountTab userData={userData} />}
           {activeTab === 'preferences' && userData && <PreferencesTab userData={userData} />}

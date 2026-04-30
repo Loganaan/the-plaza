@@ -83,7 +83,7 @@ export default function ReportsPage() {
 
   if (!isAdmin) {
     return (
-      <div className={`min-h-screen p-6 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      <div className={`min-h-screen p-6 ${isDarkMode ? "bg-[#121212]" : "bg-white"}`}>
         <div className="max-w-4xl mx-auto">
           <div
             className={`rounded-lg p-6 text-center shadow-sm ${
@@ -107,7 +107,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className={`min-h-screen p-6 ${isDarkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+    <div className={`min-h-screen p-6 ${isDarkMode ? "bg-[#121212]" : "bg-white"}`}>
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
@@ -179,7 +179,7 @@ export default function ReportsPage() {
 
                 {report.message && (
                   <div className={`mt-3 rounded-md p-3 text-sm ${
-                    isDarkMode ? "bg-gray-900 text-gray-300" : "bg-gray-50 text-gray-700"
+                    isDarkMode ? "bg-[#181818] text-gray-300" : "bg-gray-50 text-gray-700"
                   }`}>
                     {report.message}
                   </div>
@@ -188,7 +188,7 @@ export default function ReportsPage() {
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <div
                     className={`rounded-md p-3 ${
-                      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+                      isDarkMode ? "bg-[#181818]" : "bg-gray-50"
                     }`}
                   >
                     <p className={`text-xs font-semibold uppercase ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
@@ -213,7 +213,7 @@ export default function ReportsPage() {
 
                   <div
                     className={`rounded-md p-3 ${
-                      isDarkMode ? "bg-gray-900" : "bg-gray-50"
+                      isDarkMode ? "bg-[#181818]" : "bg-gray-50"
                     }`}
                   >
                     <p className={`text-xs font-semibold uppercase ${isDarkMode ? "text-gray-500" : "text-gray-500"}`}>
