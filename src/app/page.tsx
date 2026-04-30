@@ -14,7 +14,9 @@ export default function Dashboard() {
         const response = await fetch('/api/listings');
         if (response.ok) {
           const data = await response.json();
-          setListingCount(data.length);
+          // Handle paginated response - get total from pagination or count array length
+          const count = data.pagination?.total || data.data?.length || 0;
+          setListingCount(count);
         }
       } catch (err) {
         console.error('Failed to fetch listing count:', err);

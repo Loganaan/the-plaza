@@ -33,7 +33,9 @@ export default function DiscussionsPage() {
         const response = await fetch('/api/discussions');
         if (!response.ok) throw new Error('Failed to fetch discussions');
         const data = await response.json();
-        setDiscussions(data);
+        // Handle paginated response structure
+        const discussionsArray = data.data || data;
+        setDiscussions(Array.isArray(discussionsArray) ? discussionsArray : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {

@@ -36,7 +36,9 @@ export default function Marketplace() {
           throw new Error(showMine ? "Failed to fetch your listings" : "Failed to fetch listings");
         }
         const data = await response.json();
-        setListings(data);
+        // Handle paginated response structure
+        const listingsArray = data.data || data;
+        setListings(Array.isArray(listingsArray) ? listingsArray : []);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {

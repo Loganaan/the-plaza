@@ -9,7 +9,7 @@ const navItems = [
   { label: "Dashboard", href: "/" },
   { label: "Marketplace", href: "/marketplace" },
   { label: "Discussion Board", href: "/discussions" },
-  "Settings",
+  { label: "Settings", href: "/settings" },
 ];
 
 export default function Sidebar() {
@@ -52,34 +52,22 @@ export default function Sidebar() {
           </button>
         </div>
         <nav className="space-y-2">
-          {navItems.map((item) =>
-            typeof item === "string" ? (
-              <button
-                key={item}
-                className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg text-left ${
-                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
-                }`}
-                title={isCollapsed ? item : ""}
-              >
-                <span className="capitalize whitespace-nowrap overflow-hidden">{isCollapsed ? item[0] : item}</span>
-              </button>
-            ) : (
-              <a
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg text-left ${
-                  isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
-                } ${
-                  pathname === item.href || pathname.startsWith(item.href + "/")
-                    ? "bg-gradient-to-r from-yellow-400 to-yellow-600 text-black"
-                    : ""
-                }`}
-                title={isCollapsed ? item.label : ""}
-              >
-                <span className="capitalize whitespace-nowrap overflow-hidden">{isCollapsed ? item.label[0] : item.label}</span>
-              </a>
-            )
-          )}
+          {navItems.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg text-left ${
+                isDarkMode ? "hover:bg-gray-700" : "hover:bg-gray-200"
+              } ${
+                pathname === item.href || pathname.startsWith(item.href + "/")
+                  ? "bg-gradient-to-r from-yellow-400 to-yellow-600 text-black"
+                  : ""
+              }`}
+              title={isCollapsed ? item.label : ""}
+            >
+              <span className="capitalize whitespace-nowrap overflow-hidden">{isCollapsed ? item.label[0] : item.label}</span>
+            </a>
+          ))}
         </nav>
       </div>
       {/* Bottom Controls */}
