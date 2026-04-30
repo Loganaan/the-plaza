@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { UpdateReplySchema } from '@/lib/validations';
+import { validateUpdateReply } from '@/lib/validations';
 import { findProfanity } from '@/lib/profanity';
 
 export async function PUT(
@@ -39,10 +39,10 @@ export async function PUT(
     const body = await request.json();
 
     // Validate input
-    const validationResult = UpdateReplySchema.safeParse(body);
+    const validationResult = validateUpdateReply(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: validationResult.error },
         { status: 400 }
       );
     }

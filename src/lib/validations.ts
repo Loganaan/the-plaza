@@ -1,73 +1,213 @@
-import { z } from 'zod';
+// Type definitions for validation
+export interface CreateListingInput {
+  title: string;
+  description?: string | null;
+  price: number;
+  imageUrl?: string | null;
+  category?: string;
+  categoryId?: number;
+}
 
-// Pagination schema
-export const PaginationSchema = z.object({
-  limit: z.coerce.number().int().positive().default(20),
-  offset: z.coerce.number().int().nonnegative().default(0),
-});
+export interface UpdateListingInput {
+  title?: string;
+  description?: string | null;
+  price?: number;
+  imageUrl?: string | null;
+  status?: 'active' | 'sold' | 'deleted';
+}
 
-// Listing validation
-export const CreateListingSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200),
-  description: z.string().optional().nullable(),
-  price: z.number().nonnegative('Price must be non-negative'),
-  imageUrl: z.string().url().optional().nullable(),
-  category: z.string().optional(),
-  categoryId: z.number().int().optional(),
-});
+export interface CreateDiscussionInput {
+  title: string;
+  description: string;
+  categoryId?: number;
+}
 
-export const UpdateListingSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().optional().nullable(),
-  price: z.number().nonnegative().optional(),
-  imageUrl: z.string().url().optional().nullable(),
-  status: z.enum(['active', 'sold', 'deleted']).optional(),
-});
+export interface UpdateDiscussionInput {
+  title?: string;
+  description?: string;
+  categoryId?: number;
+}
 
-export type CreateListingInput = z.infer<typeof CreateListingSchema>;
-export type UpdateListingInput = z.infer<typeof UpdateListingSchema>;
+export interface CreateReplyInput {
+  content: string;
+  discussionId: number;
+}
 
-// Discussion validation
-export const CreateDiscussionSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200),
-  description: z.string().min(1, 'Description is required').max(5000),
-  categoryId: z.number().int().optional(),
-});
+export interface UpdateReplyInput {
+  content?: string;
+}
 
-export const UpdateDiscussionSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().min(1).max(5000).optional(),
-  categoryId: z.number().int().optional(),
-});
+export interface CreateMessageInput {
+  conversationId: number;
+  content: string;
+}
 
-export type CreateDiscussionInput = z.infer<typeof CreateDiscussionSchema>;
-export type UpdateDiscussionInput = z.infer<typeof UpdateDiscussionSchema>;
+export interface MarkMessageAsReadInput {
+  messageIds?: number[];
+}
 
-// Reply validation
-export const CreateReplySchema = z.object({
-  content: z.string().min(1, 'Reply content is required').max(5000),
-  discussionId: z.number().int().positive(),
-});
+export interface PaginationParams {
+  limit: number;
+  offset: number;
+}
 
-export const UpdateReplySchema = z.object({
-  content: z.string().min(1).max(5000).optional(),
-});
+// Validation functions
+export const validatePagination = (data: any): { success: boolean; data?: PaginationParams; error?: string } => {
+  const limit = parseInt(data.limit || '20', 10);
+  const offset = parseInt(data.offset || '0', 10);
+  
+  if (isNaN(limit) || limit <= 0) {
+    return { success: false, error: 'Invalid limit' };
+  }
+  if (isNaN(offset) || offset < 0) {
+    return { success: false, error: 'Invalid offset' };
+  }
+  
+  return { success: true, data: { limit, offset } };
+};
 
-export type CreateReplyInput = z.infer<typeof CreateReplySchema>;
-export type UpdateReplyInput = z.infer<typeof UpdateReplySchema>;
+export const validateCreateListing = (data: any): { success: boolean; data?: CreateListingInput; error?: any } => {
+  const errors: any = {};
+  
+  if (!data.title || typeof data.title !== 'string' || data.title.length === 0 || data.title.length > 200) {
+    errors.title = 'Title is required and must be between 1-200 characters';
+  }
+  if (data.price !== undefined && (typeof data.price !== 'number' || data.price < 0)) {
+    errors.price = 'Price must be non-negative';
+  }
+  if (data.imageUrl && typeof data.imageUrl === 'string' && !isValidUrl(data.imageUrl)) {
+    errors.imageUrl = 'Invalid URL';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
 
-// Message validation
-export const CreateMessageSchema = z.object({
-  conversationId: z.number().int().positive(),
-  content: z.string().min(1, 'Message content is required').max(5000),
-});
+export const validateUpdateListing = (data: any): { success: boolean; data?: UpdateListingInput; error?: any } => {
+  const errors: any = {};
+  
+  if (data.title !== undefined && (typeof data.title !== 'string' || data.title.length === 0 || data.title.length > 200)) {
+    errors.title = 'Title must be between 1-200 characters';
+  }
+  if (data.price !== undefined && (typeof data.price !== 'number' || data.price < 0)) {
+    errors.price = 'Price must be non-negative';
+  }
+  if (data.imageUrl && typeof data.imageUrl === 'string' && !isValidUrl(data.imageUrl)) {
+    errors.imageUrl = 'Invalid URL';
+  }
+  if (data.status && !['active', 'sold', 'deleted'].includes(data.status)) {
+    errors.status = 'Invalid status';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
 
-export const MarkMessageAsReadSchema = z.object({
-  messageIds: z.array(z.number().int()).optional(),
-});
+export const validateCreateDiscussion = (data: any): { success: boolean; data?: CreateDiscussionInput; error?: any } => {
+  const errors: any = {};
+  
+  if (!data.title || typeof data.title !== 'string' || data.title.length === 0 || data.title.length > 200) {
+    errors.title = 'Title is required and must be between 1-200 characters';
+  }
+  if (!data.description || typeof data.description !== 'string' || data.description.length === 0 || data.description.length > 5000) {
+    errors.description = 'Description is required and must be between 1-5000 characters';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
 
-export type CreateMessageInput = z.infer<typeof CreateMessageSchema>;
-export type MarkMessageAsReadInput = z.infer<typeof MarkMessageAsReadSchema>;
+export const validateUpdateDiscussion = (data: any): { success: boolean; data?: UpdateDiscussionInput; error?: any } => {
+  const errors: any = {};
+  
+  if (data.title !== undefined && (typeof data.title !== 'string' || data.title.length === 0 || data.title.length > 200)) {
+    errors.title = 'Title must be between 1-200 characters';
+  }
+  if (data.description !== undefined && (typeof data.description !== 'string' || data.description.length === 0 || data.description.length > 5000)) {
+    errors.description = 'Description must be between 1-5000 characters';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
+
+export const validateCreateReply = (data: any): { success: boolean; data?: CreateReplyInput; error?: any } => {
+  const errors: any = {};
+  
+  if (!data.content || typeof data.content !== 'string' || data.content.length === 0 || data.content.length > 5000) {
+    errors.content = 'Reply content is required and must be between 1-5000 characters';
+  }
+  if (!data.discussionId || typeof data.discussionId !== 'number' || data.discussionId <= 0) {
+    errors.discussionId = 'Valid discussion ID is required';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
+
+export const validateUpdateReply = (data: any): { success: boolean; data?: UpdateReplyInput; error?: any } => {
+  const errors: any = {};
+  
+  if (data.content !== undefined && (typeof data.content !== 'string' || data.content.length === 0 || data.content.length > 5000)) {
+    errors.content = 'Content must be between 1-5000 characters';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
+
+export const validateCreateMessage = (data: any): { success: boolean; data?: CreateMessageInput; error?: any } => {
+  const errors: any = {};
+  
+  if (!data.conversationId || typeof data.conversationId !== 'number' || data.conversationId <= 0) {
+    errors.conversationId = 'Valid conversation ID is required';
+  }
+  if (!data.content || typeof data.content !== 'string' || data.content.length === 0 || data.content.length > 5000) {
+    errors.content = 'Message content is required and must be between 1-5000 characters';
+  }
+  
+  if (Object.keys(errors).length > 0) {
+    return { success: false, error: errors };
+  }
+  
+  return { success: true, data };
+};
+
+export const validateMarkMessageAsRead = (data: any): { success: boolean; data?: MarkMessageAsReadInput; error?: any } => {
+  if (data.messageIds && !Array.isArray(data.messageIds)) {
+    return { success: false, error: 'messageIds must be an array' };
+  }
+  
+  return { success: true, data };
+};
+
+// Helper function to validate URLs
+function isValidUrl(string: string): boolean {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 
 // Utility function for pagination response
 export const createPaginatedResponse = <T>(data: T[], total: number, limit: number, offset: number) => ({

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { CreateMessageSchema } from '@/lib/validations';
+import { validateCreateMessage } from '@/lib/validations';
 
 export async function GET(request: NextRequest) {
   try {
@@ -72,10 +72,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate input
-    const validationResult = CreateMessageSchema.safeParse(body);
+    const validationResult = validateCreateMessage(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: validationResult.error },
         { status: 400 }
       );
     }

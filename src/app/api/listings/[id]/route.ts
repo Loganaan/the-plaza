@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { UpdateListingSchema } from '@/lib/validations';
+import { validateUpdateListing } from '@/lib/validations';
 import { findProfanity } from '@/lib/profanity';
 
 export async function GET(
@@ -153,15 +153,15 @@ export async function PUT(
     const body = await request.json();
 
     // Validate input
-    const validationResult = UpdateListingSchema.safeParse(body);
+    const validationResult = validateUpdateListing(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: validationResult.error },
         { status: 400 }
       );
     }
 
-    const { title, description, price, imageUrl, status } = validationResult.data;
+    const { title, description, price, imageUrl, status } = validationResult.data!;
 
     // Check for profanity if title or description is being updated
     if (title || description) {
@@ -234,15 +234,15 @@ export async function PATCH(
     const body = await request.json();
 
     // Validate input
-    const validationResult = UpdateListingSchema.safeParse(body);
+    const validationResult = validateUpdateListing(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: validationResult.error },
         { status: 400 }
       );
     }
 
-    const { title, description, price, imageUrl, status } = validationResult.data;
+    const { title, description, price, imageUrl, status } = validationResult.data!;
 
     // Check for profanity if title or description is being updated
     if (title || description) {

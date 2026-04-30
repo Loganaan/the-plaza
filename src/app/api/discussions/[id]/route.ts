@@ -2,7 +2,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { UpdateDiscussionSchema } from '@/lib/validations';
+import { validateUpdateDiscussion } from '@/lib/validations';
 import { findProfanity } from '@/lib/profanity';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -74,10 +74,10 @@ export async function PUT(
     const body = await request.json();
 
     // Validate input
-    const validationResult = UpdateDiscussionSchema.safeParse(body);
+    const validationResult = validateUpdateDiscussion(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.flatten() },
+        { error: 'Invalid input', details: validationResult.error },
         { status: 400 }
       );
     }
