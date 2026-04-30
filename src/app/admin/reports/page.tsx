@@ -310,7 +310,7 @@ export default function ReportsPage() {
         )}
 
         {discussionReports.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-4 pt-6">
             <div className="flex items-center justify-between">
               <h2 className={`text-lg font-semibold ${isDarkMode ? "text-white" : "text-gray-900"}`}>
                 Discussion Reports
