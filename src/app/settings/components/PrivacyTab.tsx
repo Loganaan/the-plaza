@@ -58,7 +58,7 @@ export default function PrivacyTab({ userData }: PrivacyTabProps) {
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Messaging
         </h3>
-        <div className={`p-4 rounded-lg flex items-center gap-3 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+        <div className={`p-4 rounded-lg flex items-center gap-3 ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-gray-100'}`}>
           <input
             type="checkbox"
             name="canReceiveMessages"
@@ -82,9 +82,9 @@ export default function PrivacyTab({ userData }: PrivacyTabProps) {
           onChange={handleChange}
           className={`w-full px-4 py-2 rounded-lg border ${
             isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white'
+              ? 'bg-[#1c1c1c] border-gray-700 text-white'
               : 'bg-white border-gray-300 text-gray-900'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
         >
           <option value="public">Public - Everyone can see your listings</option>
           <option value="contacts-only">Contacts Only - Only your contacts can see</option>
@@ -105,9 +105,9 @@ export default function PrivacyTab({ userData }: PrivacyTabProps) {
           onChange={handleChange}
           className={`w-full px-4 py-2 rounded-lg border ${
             isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white'
+              ? 'bg-[#1c1c1c] border-gray-700 text-white'
               : 'bg-white border-gray-300 text-gray-900'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
         >
           <option value="public">Public - Everyone can view your profile</option>
           <option value="private">Private - Only you can view your profile</option>
@@ -118,7 +118,17 @@ export default function PrivacyTab({ userData }: PrivacyTabProps) {
       </div>
 
       {message && (
-        <div className={`p-3 rounded-lg ${message.includes('✓') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div
+          className={`p-3 rounded-lg ${
+            message.includes('✓')
+              ? isDarkMode
+                ? 'bg-green-900/20 text-green-200'
+                : 'bg-green-100 text-green-800'
+              : isDarkMode
+              ? 'bg-red-900/20 text-red-200'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
           {message}
         </div>
       )}
@@ -126,7 +136,7 @@ export default function PrivacyTab({ userData }: PrivacyTabProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 text-white font-medium py-2 rounded-lg transition-colors"
+        className="w-full bg-gradient-to-r from-[#F7C600] to-[#C97A00] hover:opacity-90 disabled:opacity-60 text-black font-semibold py-2 rounded-lg transition"
       >
         {loading ? 'Saving...' : 'Save Changes'}
       </button>

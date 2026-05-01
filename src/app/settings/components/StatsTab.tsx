@@ -27,30 +27,21 @@ export default function StatsTab({ stats, userData }: StatsTabProps) {
 
   const statCards = [
     {
-      label: 'Listings Created',
+      label: 'Listings',
       value: stats?.listingsCreated || 0,
-      icon: '📦',
-      color: 'blue',
+      note: 'Items posted',
     },
     {
-      label: 'Discussions Started',
+      label: 'Discussions',
       value: stats?.discussionsCreated || 0,
-      icon: '💬',
-      color: 'green',
+      note: 'Threads started',
     },
     {
-      label: 'Replies Posted',
+      label: 'Replies',
       value: stats?.repliesCreated || 0,
-      icon: '✉️',
-      color: 'purple',
+      note: 'Messages sent',
     },
   ];
-
-  const colorMap = {
-    blue: isDarkMode ? 'bg-blue-900/30 border-blue-700' : 'bg-blue-50 border-blue-200',
-    green: isDarkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200',
-    purple: isDarkMode ? 'bg-purple-900/30 border-purple-700' : 'bg-purple-50 border-purple-200',
-  };
 
   return (
     <div className="space-y-6">
@@ -62,15 +53,21 @@ export default function StatsTab({ stats, userData }: StatsTabProps) {
           {statCards.map((card) => (
             <div
               key={card.label}
-              className={`p-6 rounded-lg border-2 ${colorMap[card.color as keyof typeof colorMap]}`}
+              className={`rounded-xl border p-5 shadow-sm ${
+                isDarkMode ? 'bg-[#1c1c1c] border-gray-800' : 'bg-white border-gray-200'
+              }`}
             >
-              <div className="text-3xl mb-2">{card.icon}</div>
-              <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                 {card.label}
               </p>
-              <p className={`text-2xl font-bold mt-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                {card.value}
-              </p>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className={`text-3xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {card.value}
+                </span>
+                <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {card.note}
+                </span>
+              </div>
             </div>
           ))}
         </div>
@@ -80,16 +77,28 @@ export default function StatsTab({ stats, userData }: StatsTabProps) {
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Account Information
         </h3>
-        <div className="space-y-3">
-          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Member since</p>
-            <p className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div
+            className={`rounded-xl border p-4 ${
+              isDarkMode ? 'bg-[#1c1c1c] border-gray-800' : 'bg-white border-gray-200'
+            }`}
+          >
+            <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              Member since
+            </p>
+            <p className={`mt-2 text-lg font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
               {formatDate(userData?.createdAt)}
             </p>
           </div>
-          <div className={`p-4 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Account Name</p>
-            <p className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div
+            className={`rounded-xl border p-4 ${
+              isDarkMode ? 'bg-[#1c1c1c] border-gray-800' : 'bg-white border-gray-200'
+            }`}
+          >
+            <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              Account name
+            </p>
+            <p className={`mt-2 text-lg font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
               {userData?.name || 'Not set'}
             </p>
           </div>
@@ -98,13 +107,21 @@ export default function StatsTab({ stats, userData }: StatsTabProps) {
 
       <div>
         <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-          Level & Badges
+          Standing
         </h3>
-        <div className={`p-6 rounded-lg text-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-          <p className="text-4xl mb-2">🌟</p>
-          <p className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Member</p>
-          <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            Keep engaging to unlock badges!
+        <div
+          className={`rounded-xl border p-5 ${
+            isDarkMode ? 'bg-[#1c1c1c] border-gray-800' : 'bg-white border-gray-200'
+          }`}
+        >
+          <p className={`text-xs uppercase tracking-wide ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+            Current level
+          </p>
+          <p className={`mt-2 text-xl font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`}>
+            Member
+          </p>
+          <p className={`mt-1 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            Keep engaging to unlock badges.
           </p>
         </div>
       </div>

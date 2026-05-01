@@ -89,7 +89,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center">Loading settings...</div>
         </div>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
 
   if (error) {
     return (
-      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="text-red-500">{error}</div>
         </div>
@@ -108,14 +108,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen p-6 ${isDarkMode ? 'bg-[#121212]' : 'bg-gray-50'}`}>
       <div className="max-w-4xl mx-auto">
         <h1 className={`text-3xl font-bold mb-8 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
           Settings
         </h1>
 
         {/* Tabs Navigation */}
-        <div className="mb-6 border-b border-gray-300 dark:border-gray-700">
+        <div className="mb-6 border-b border-gray-300 dark:border-gray-800">
           <div className="flex gap-4 flex-wrap">
             {tabs.map((tab) => (
               <button
@@ -123,9 +123,9 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`pb-2 px-4 font-medium transition-colors ${
                   activeTab === tab.id
-                    ? `border-b-2 ${isDarkMode ? 'border-blue-500 text-blue-500' : 'border-blue-600 text-blue-600'}`
+                    ? `border-b-2 ${isDarkMode ? 'border-yellow-400 text-yellow-200' : 'border-yellow-600 text-yellow-700'}`
                     : isDarkMode
-                    ? 'text-gray-400 hover:text-gray-300'
+                    ? 'text-gray-400 hover:text-gray-200'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -136,7 +136,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Content */}
-        <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+        <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-white'} shadow-sm`}>
           {activeTab === 'profile' && userData && <ProfileTab userData={userData} />}
           {activeTab === 'account' && userData && <AccountTab userData={userData} />}
           {activeTab === 'preferences' && userData && <PreferencesTab userData={userData} />}

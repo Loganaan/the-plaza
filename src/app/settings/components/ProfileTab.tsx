@@ -67,9 +67,9 @@ export default function ProfileTab({ userData }: ProfileTabProps) {
           maxLength={100}
           className={`w-full px-4 py-2 rounded-lg border ${
             isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white'
+              ? 'bg-[#1c1c1c] border-gray-700 text-white'
               : 'bg-white border-gray-300 text-gray-900'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
         />
       </div>
 
@@ -86,9 +86,9 @@ export default function ProfileTab({ userData }: ProfileTabProps) {
           placeholder="Write a short bio about yourself..."
           className={`w-full px-4 py-2 rounded-lg border ${
             isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white'
+              ? 'bg-[#1c1c1c] border-gray-700 text-white'
               : 'bg-white border-gray-300 text-gray-900'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
         />
         <div className={`text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           {formData.bio.length}/500
@@ -108,14 +108,24 @@ export default function ProfileTab({ userData }: ProfileTabProps) {
           placeholder="City, State"
           className={`w-full px-4 py-2 rounded-lg border ${
             isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white'
+              ? 'bg-[#1c1c1c] border-gray-700 text-white'
               : 'bg-white border-gray-300 text-gray-900'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          } focus:outline-none focus:ring-2 focus:ring-yellow-500`}
         />
       </div>
 
       {message && (
-        <div className={`p-3 rounded-lg ${message.includes('✓') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div
+          className={`p-3 rounded-lg ${
+            message.includes('✓')
+              ? isDarkMode
+                ? 'bg-green-900/20 text-green-200'
+                : 'bg-green-100 text-green-800'
+              : isDarkMode
+              ? 'bg-red-900/20 text-red-200'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
           {message}
         </div>
       )}
@@ -123,7 +133,7 @@ export default function ProfileTab({ userData }: ProfileTabProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 text-white font-medium py-2 rounded-lg transition-colors"
+        className="w-full bg-gradient-to-r from-[#F7C600] to-[#C97A00] hover:opacity-90 disabled:opacity-60 text-black font-semibold py-2 rounded-lg transition"
       >
         {loading ? 'Saving...' : 'Save Changes'}
       </button>

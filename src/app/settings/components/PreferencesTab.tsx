@@ -54,7 +54,7 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
 
         <div className="space-y-4">
           {/* Push Notifications */}
-          <div className={`p-4 rounded-lg flex items-center justify-between ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+          <div className={`p-4 rounded-lg flex items-center justify-between ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-gray-100'}`}>
             <div>
               <p className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Push Notifications</p>
               <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -65,7 +65,7 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
               disabled={loading}
               onClick={() => handleToggle('notificationsEnabled', !formData.notificationsEnabled)}
               className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                formData.notificationsEnabled ? 'bg-blue-600' : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                formData.notificationsEnabled ? 'bg-yellow-500' : isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
               }`}
             >
               <span
@@ -77,7 +77,7 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
           </div>
 
           {/* Email Notifications */}
-          <div className={`p-4 rounded-lg flex items-center justify-between ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+          <div className={`p-4 rounded-lg flex items-center justify-between ${isDarkMode ? 'bg-[#1c1c1c]' : 'bg-gray-100'}`}>
             <div>
               <p className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Email Notifications</p>
               <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -88,7 +88,7 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
               disabled={loading}
               onClick={() => handleToggle('emailNotifications', !formData.emailNotifications)}
               className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                formData.emailNotifications ? 'bg-blue-600' : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                formData.emailNotifications ? 'bg-yellow-500' : isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
               }`}
             >
               <span
@@ -102,7 +102,17 @@ export default function PreferencesTab({ userData }: PreferencesTabProps) {
       </div>
 
       {message && (
-        <div className={`p-3 rounded-lg ${message.includes('✓') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <div
+          className={`p-3 rounded-lg ${
+            message.includes('✓')
+              ? isDarkMode
+                ? 'bg-green-900/20 text-green-200'
+                : 'bg-green-100 text-green-800'
+              : isDarkMode
+              ? 'bg-red-900/20 text-red-200'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
           {message}
         </div>
       )}
